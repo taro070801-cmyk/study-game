@@ -1,52 +1,5 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <!-- Firebase 読み込み ＆ ログイン機能 -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-  // Firebaseの設定
-  const firebaseConfig = {
-    apiKey: "AIzaSyCh9gzYEt4TQLQYdVHgbTQ64F6veOWNMWU",
-    authDomain: "study-game-3370b.firebaseapp.com",
-    projectId: "study-game-3370b",
-    storageBucket: "study-game-3370b.firebasestorage.app",
-    messagingSenderId: "1022761221608",
-    appId: "1:1022761221608:web:6f939b78d2c9754284b85d",
-    measurementId: "G-VBFT1RN23E"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-
-  // ログイン処理（ボタンを押したとき用）
-  window.loginWithGoogle = function() {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        alert(`ログインしました: ${user.displayName}さん`);
-      })
-      .catch((error) => {
-        console.error("ログインエラー:", error);
-      });
-  };
-
-  // ログイン状態の監視
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("ログイン中ユーザー:", user.displayName, user.email);
-      // 画面にユーザー名を表示したい場合はここに処理を書きます
-    } else {
-      console.log("未ログイン状態");
-    }
-  });
-</script>
-
-<!-- ログインボタン（HTML内の表示したい場所へ設置） -->
-<button onclick="loginWithGoogle()" style="padding: 10px 15px; cursor: pointer;">
-  Googleでログイン
-</button>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,9 +10,47 @@
   <link rel="apple-touch-icon" href="Gemini_Generated_Image_8rgt0y8rgt0y8rgt.jpeg">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase 読み込み ＆ ログイン機能 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCh9gzYEt4TQLQYdVHgbTQ64F6veOWNMWU",
+      authDomain: "study-game-3370b.firebaseapp.com",
+      projectId: "study-game-3370b",
+      storageBucket: "study-game-3370b.firebasestorage.app",
+      messagingSenderId: "1022761221608",
+      appId: "1:1022761221608:web:6f939b78d2c9754284b85d",
+      measurementId: "G-VBFT1RN23E"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    window.loginWithGoogle = function() {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          alert(`ログインしました: ${result.user.displayName}さん`);
+        })
+        .catch((error) => {
+          console.error("ログインエラー:", error);
+        });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("ログイン中ユーザー:", user.displayName, user.email);
+      } else {
+        console.log("未ログイン状態");
+      }
+    });
+  </script>
+
   <style>
     :root {
-      /* アースカラー & 自然のテーマ */
       --bg-gradient: linear-gradient(135deg, #e4efe7 0%, #ceddcc 35%, #b3cdd1 70%, #9cb8c4 100%);
       --card-bg: rgba(247, 249, 246, 0.92);
       --text-main: #2d3732;
@@ -67,13 +58,11 @@
       --primary: #3b604e;
       --border-color: #c4d1c7;
       
-      /* 通常時のカラー */
       --subject-english: #f4c2c2;
       --subject-japanese: #f8cb9c;
       --subject-history: #b5dba4;
       --subject-other: #d1d8e0;
 
-      /* 達成時（100%到達時）の深い濃色 */
       --subject-english-completed: #c95b6c;
       --subject-japanese-completed: #d9822b;
       --subject-history-completed: #4e8b3b;
@@ -193,33 +182,27 @@
       font-size: 0.95rem;
     }
 
-    .inline-inputs {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 10px;
-    }
-
-    @media (max-width: 600px) {
-      .inline-inputs { grid-template-columns: 1fr; }
-    }
-
-    button.primary-btn {
-      margin-top: 15px;
+    /* ワンポチ用ボタンの装飾 */
+    button.quick-pt-btn {
       width: 100%;
-      padding: 12px;
-      background-color: var(--primary);
-      color: #ffffff;
+      padding: 16px;
+      background-color: #2e7d32;
+      color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.1s, background-color 0.2s;
     }
 
-    button.primary-btn:hover { opacity: 0.9; }
+    button.quick-pt-btn:active {
+      transform: scale(0.98);
+      background-color: #1b5e20;
+    }
 
-    /* 科目別横向き進捗バー */
     .subject-goal-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -294,7 +277,6 @@
     }
     .check-mark.active { display: inline; }
 
-    /* リスト表示 */
     .task-list {
       list-style: none;
       margin-top: 10px;
@@ -341,10 +323,8 @@
       cursor: pointer;
       font-size: 0.8rem;
     }
-    .edit-btn { background: #d0e1fd; color: #1c3d5a; }
     .delete-btn { background: #e2b3b3; color: #5c2222; }
 
-    /* 項目設定管理エリア */
     .setting-section {
       background: #ffffff;
       padding: 15px;
@@ -449,9 +429,13 @@
       <h1>早稲田攻略 戦略ナビゲーター</h1>
       <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / アイコン設定済み</p>
     </div>
-    <div class="api-key-box">
-      <label for="api-key" style="margin:0; font-size:0.8rem;">Gemini API Key:</label>
-      <input type="password" id="api-key" placeholder="AIzaSy..." onchange="saveData()">
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button onclick="loginWithGoogle()" style="padding: 6px 12px; cursor: pointer; border-radius: 6px; border: 1px solid var(--border-color);">
+        Googleでログイン
+      </button>
+      <div class="api-key-box" style="margin: 0;">
+        <input type="password" id="api-key" placeholder="Gemini API Key" onchange="saveData()">
+      </div>
     </div>
   </header>
 
@@ -464,16 +448,16 @@
   <!-- PAGE 1: タスク管理 & 記録 -->
   <div id="task-page" class="tab-content active">
     <div class="card">
-      <h2>本日の科目別目標達成度</h2>
+      <h2>本日の科目別目標達成度（pt）</h2>
       <div class="subject-goal-grid">
         <div class="goal-card">
           <div class="goal-header">
             <span>英語</span>
-            <span><span id="val-english">0</span> / <span id="max-display-english">50</span> <span id="check-english" class="check-mark">✔ (達成!)</span></span>
+            <span><span id="val-english">0</span> / <span id="max-display-english">5</span> pt <span id="check-english" class="check-mark">✔ (達成!)</span></span>
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
-            <input type="number" id="goal-english" value="50" onchange="updateGoalProgress(); saveData();">
+            <input type="number" id="goal-english" value="5" onchange="updateGoalProgress(); saveData();">
           </div>
           <div class="progress-bar-bg"><div id="bar-english" class="progress-bar-fill fill-english"></div></div>
         </div>
@@ -481,11 +465,11 @@
         <div class="goal-card">
           <div class="goal-header">
             <span>国語</span>
-            <span><span id="val-japanese">0</span> / <span id="max-display-japanese">30</span> <span id="check-japanese" class="check-mark">✔ (達成!)</span></span>
+            <span><span id="val-japanese">0</span> / <span id="max-display-japanese">3</span> pt <span id="check-japanese" class="check-mark">✔ (達成!)</span></span>
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
-            <input type="number" id="goal-japanese" value="30" onchange="updateGoalProgress(); saveData();">
+            <input type="number" id="goal-japanese" value="3" onchange="updateGoalProgress(); saveData();">
           </div>
           <div class="progress-bar-bg"><div id="bar-japanese" class="progress-bar-fill fill-japanese"></div></div>
         </div>
@@ -493,11 +477,11 @@
         <div class="goal-card">
           <div class="goal-header">
             <span>日本史</span>
-            <span><span id="val-history">0</span> / <span id="max-display-history">40</span> <span id="check-history" class="check-mark">✔ (達成!)</span></span>
+            <span><span id="val-history">0</span> / <span id="max-display-history">4</span> pt <span id="check-history" class="check-mark">✔ (達成!)</span></span>
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
-            <input type="number" id="goal-history" value="40" onchange="updateGoalProgress(); saveData();">
+            <input type="number" id="goal-history" value="4" onchange="updateGoalProgress(); saveData();">
           </div>
           <div class="progress-bar-bg"><div id="bar-history" class="progress-bar-fill fill-history"></div></div>
         </div>
@@ -505,11 +489,11 @@
         <div class="goal-card">
           <div class="goal-header">
             <span>その他</span>
-            <span><span id="val-other">0</span> / <span id="max-display-other">10</span> <span id="check-other" class="check-mark">✔ (達成!)</span></span>
+            <span><span id="val-other">0</span> / <span id="max-display-other">2</span> pt <span id="check-other" class="check-mark">✔ (達成!)</span></span>
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
-            <input type="number" id="goal-other" value="10" onchange="updateGoalProgress(); saveData();">
+            <input type="number" id="goal-other" value="2" onchange="updateGoalProgress(); saveData();">
           </div>
           <div class="progress-bar-bg"><div id="bar-other" class="progress-bar-fill fill-other"></div></div>
         </div>
@@ -517,7 +501,7 @@
     </div>
 
     <div class="card">
-      <h2>新規学習タスクの登録 / 学習ログ追加</h2>
+      <h2>学習ログの記録</h2>
       <form id="task-form">
         <label for="task-subject">科目</label>
         <select id="task-subject" onchange="updateSubSubjectOptions(); updateTaskSelectOptions();">
@@ -530,24 +514,16 @@
         <label for="task-sub-subject">分類（内訳）</label>
         <select id="task-sub-subject"></select>
 
-        <div class="inline-inputs" style="margin-top:10px;">
-          <div>
-            <label for="task-select">教材名</label>
-            <select id="task-select" onchange="handleTaskSelectChange()"></select>
-            <input type="text" id="task-name-custom" placeholder="新規教材名を入力" style="display:none; margin-top:5px;">
-          </div>
-          <div>
-            <label for="task-amount">進めた量</label>
-            <input type="number" id="task-amount" value="10" min="1">
-          </div>
-          <div>
-            <label for="task-unit">単位</label>
-            <select id="task-unit-select" onchange="handleUnitSelectChange()"></select>
-            <input type="text" id="task-unit-custom" placeholder="例: 講" style="display:none; margin-top:5px;">
-          </div>
-        </div>
+        <label for="task-select">教材名</label>
+        <select id="task-select" onchange="handleTaskSelectChange()"></select>
+        <input type="text" id="task-name-custom" placeholder="新規教材名を入力" style="display:none; margin-top:5px;">
 
-        <button type="button" class="primary-btn" onclick="addStudyLog()">学習実績を記録する</button>
+        <div style="margin-top: 20px;">
+          <!-- 爆速ワンポチボタン -->
+          <button type="button" class="quick-pt-btn" onclick="addQuickPoint()">
+            🔥 1タスク完了！（＋1pt）
+          </button>
+        </div>
       </form>
     </div>
 
@@ -560,7 +536,7 @@
   <!-- PAGE 2: AIパートナー & 分析 -->
   <div id="partner-page" class="tab-content">
     <div class="card">
-      <h2>日々の進捗推移（細軸科目別積み上げグラフ）</h2>
+      <h2>日々の進捗推移（積み上げグラフ）</h2>
       <div class="chart-container" style="height:260px;">
         <canvas id="barChart"></canvas>
       </div>
@@ -589,7 +565,7 @@
       <h2>早稲田専門エリートAIパートナーによる個別分析</h2>
       <label for="user-reflection">本日の振り返り・相談・つまずき（自由記述）</label>
       <textarea id="user-reflection" placeholder="例: 英語長文の解釈で引っかかり時間がかかった。日本史との比率調整についてもアドバイスがほしい。"></textarea>
-      <button type="button" class="primary-btn" id="ai-btn" onclick="requestAiAnalysis()">AIパートナーの多角分析を依頼する</button>
+      <button type="button" class="primary-btn" id="ai-btn" onclick="requestAiAnalysis()" style="margin-top:15px; width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">AIパートナーの多角分析を依頼する</button>
       <h3 style="font-size:0.95rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">AIレポート出力結果</h3>
       <div id="ai-report-output" class="report-output">AIキーを設定し、相談内容を入力してボタンを押すと、記録された学習データと各分野の比率を踏まえた個別アドバイスが生成されます。</div>
     </div>
@@ -601,7 +577,6 @@
       <h2>項目・分類・教材マスタの設定・編集</h2>
       <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px;">ドロップダウンに表示される分類（内訳）や教材リストを追加・編集・削除できます。</p>
 
-      <!-- 分類編集 -->
       <div class="setting-section">
         <h3>1. 各科目の分類（内訳）設定</h3>
         <label>対象科目を選択</label>
@@ -619,7 +594,6 @@
         <div id="sub-subject-tags" class="item-tag-list"></div>
       </div>
 
-      <!-- 教材編集 -->
       <div class="setting-section">
         <h3>2. 登録済み教材リスト設定</h3>
         <label>対象科目を選択</label>
@@ -636,16 +610,6 @@
         </div>
         <div id="task-tags" class="item-tag-list"></div>
       </div>
-
-      <!-- 単位編集 -->
-      <div class="setting-section">
-        <h3>3. 単位リスト設定</h3>
-        <div class="add-inline-form">
-          <input type="text" id="new-unit-input" placeholder="新しい単位を追加 (例: 講, チャプター)">
-          <button type="button" onclick="addUnitSetting()">追加</button>
-        </div>
-        <div id="unit-tags" class="item-tag-list"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -653,7 +617,7 @@
 <script>
   let studyLogs = [];
   let savedTasks = {
-    '英語': ['ターゲット1900', 'ポラリス1', '肘井の読解'],
+    '英語': ['単熟語EX準1級', 'ポラリス1', '肘井の読解'],
     '国語': ['開発講座', '古文単語315', '岡本古文文法'],
     '日本史': ['東進一問一答', '実況中継1'],
     'その他': ['小論文演習']
@@ -664,7 +628,6 @@
     '日本史': ['通史', '文化史', '史料', '一問一答'],
     'その他': ['その他']
   };
-  let customUnits = ['p', '題', '単語', '章'];
 
   let barChart, pieChartMain, pieChartEnglish, pieChartJapanese;
 
@@ -672,7 +635,6 @@
     localStorage.setItem('waseda_study_logs', JSON.stringify(studyLogs));
     localStorage.setItem('waseda_saved_tasks', JSON.stringify(savedTasks));
     localStorage.setItem('waseda_sub_subjects', JSON.stringify(savedSubSubjects));
-    localStorage.setItem('waseda_custom_units', JSON.stringify(customUnits));
     localStorage.setItem('waseda_api_key', document.getElementById('api-key').value);
     
     const goals = {
@@ -693,9 +655,6 @@
 
     const subs = localStorage.getItem('waseda_sub_subjects');
     if (subs) savedSubSubjects = JSON.parse(subs);
-
-    const units = localStorage.getItem('waseda_custom_units');
-    if (units) customUnits = JSON.parse(units);
 
     const key = localStorage.getItem('waseda_api_key');
     if (key) document.getElementById('api-key').value = key;
@@ -723,7 +682,6 @@
     } else if (tabId === 'setting-page') {
       renderSubSubjectSetting();
       renderTaskSetting();
-      renderUnitSetting();
     }
   }
 
@@ -780,36 +738,8 @@
     }
   }
 
-  function renderUnitSelectOptions() {
-    const select = document.getElementById('task-unit-select');
-    select.innerHTML = '';
-
-    customUnits.forEach(u => {
-      const opt = document.createElement('option');
-      opt.value = u;
-      opt.innerText = u;
-      select.appendChild(opt);
-    });
-
-    const newOpt = document.createElement('option');
-    newOpt.value = '__NEW__';
-    newOpt.innerText = '＋ 新しい単位を追加...';
-    select.appendChild(newOpt);
-  }
-
-  function handleUnitSelectChange() {
-    const select = document.getElementById('task-unit-select');
-    const customInput = document.getElementById('task-unit-custom');
-    if (select.value === '__NEW__') {
-      customInput.style.display = 'block';
-      customInput.focus();
-    } else {
-      customInput.style.display = 'none';
-    }
-  }
-
-  /* タスクログ追加 */
-  function addStudyLog() {
+  /* 🔥 1ポチで1pt加算する機能 */
+  function addQuickPoint() {
     const subject = document.getElementById('task-subject').value;
     const subSubject = document.getElementById('task-sub-subject').value;
     
@@ -820,26 +750,10 @@
     if (taskSelect.value === '__NEW__') {
       taskName = customTaskInput.value.trim();
       if (!taskName) return alert('教材名を入力してください。');
-      
       if (!savedTasks[subject]) savedTasks[subject] = [];
       if (!savedTasks[subject].includes(taskName)) savedTasks[subject].push(taskName);
     } else {
       taskName = taskSelect.value;
-    }
-
-    const amount = parseFloat(document.getElementById('task-amount').value) || 0;
-    if (amount <= 0) return alert('正しい量を入力してください。');
-
-    const unitSelect = document.getElementById('task-unit-select');
-    const customUnitInput = document.getElementById('task-unit-custom');
-    let unitName = '';
-
-    if (unitSelect.value === '__NEW__') {
-      unitName = customUnitInput.value.trim();
-      if (!unitName) return alert('単位を入力してください。');
-      if (!customUnits.includes(unitName)) customUnits.push(unitName);
-    } else {
-      unitName = unitSelect.value;
     }
 
     const today = new Date();
@@ -851,19 +765,17 @@
       subject,
       subSubject,
       name: taskName,
-      amount,
-      unit: unitName
+      amount: 1, // 固定で 1pt
+      unit: 'pt'
     });
 
     saveData();
     renderLogList();
     updateGoalProgress();
-    renderUnitSelectOptions();
     updateTaskSelectOptions();
     customTaskInput.value = '';
-    customUnitInput.value = '';
 
-    alert('学習ログを登録しました！');
+    alert(`＋1 pt 獲得！ (${subject}: ${taskName})`);
   }
 
   function deleteLog(id) {
@@ -894,7 +806,7 @@
         <div class="task-info">
           <span class="badge ${badgeClass}">${log.subject} (${log.subSubject})</span>
           <strong>${log.name}</strong>
-          <span>${log.amount} ${log.unit} (${log.date})</span>
+          <span>+${log.amount} ${log.unit} (${log.date})</span>
         </div>
         <div class="btn-group">
           <button class="action-btn delete-btn" onclick="deleteLog(${log.id})">削除</button>
@@ -904,7 +816,6 @@
     });
   }
 
-  /* 進捗バー更新 */
   function updateGoalProgress() {
     const subjects = [
       { key: 'english', label: '英語' },
@@ -941,7 +852,6 @@
     });
   }
 
-  /* マスタ設定管理関数 */
   function renderSubSubjectSetting() {
     const subject = document.getElementById('setting-subject-sub').value;
     const container = document.getElementById('sub-subject-tags');
@@ -1016,40 +926,6 @@
     updateTaskSelectOptions();
   }
 
-  function renderUnitSetting() {
-    const container = document.getElementById('unit-tags');
-    container.innerHTML = '';
-
-    customUnits.forEach((item, index) => {
-      const tag = document.createElement('div');
-      tag.className = 'item-tag';
-      tag.innerHTML = `${item} <span class="del-tag" onclick="removeUnitSetting(${index})">✕</span>`;
-      container.appendChild(tag);
-    });
-  }
-
-  function addUnitSetting() {
-    const input = document.getElementById('new-unit-input');
-    const val = input.value.trim();
-
-    if (!val) return;
-    if (!customUnits.includes(val)) {
-      customUnits.push(val);
-      saveData();
-      renderUnitSetting();
-      renderUnitSelectOptions();
-      input.value = '';
-    }
-  }
-
-  function removeUnitSetting(index) {
-    customUnits.splice(index, 1);
-    saveData();
-    renderUnitSetting();
-    renderUnitSelectOptions();
-  }
-
-  /* Chart & AI 関連 */
   function initCharts() {
     const ctxBar = document.getElementById('barChart').getContext('2d');
     barChart = new Chart(ctxBar, {
@@ -1193,7 +1069,7 @@
     btn.innerText = "Geminiが多角的に分析中...";
     reportBox.innerText = "学習ログの内訳と振り返りを照合中...";
 
-    const logSummary = studyLogs.map(l => `- ${l.date}: ${l.subject}(${l.subSubject}) ${l.name} ${l.amount}${l.unit}`).join('\n');
+    const logSummary = studyLogs.map(l => `- ${l.date}: ${l.subject}(${l.subSubject}) ${l.name} +${l.amount}${l.unit}`).join('\n');
 
     const systemInstruction = `
 あなたは早稲田大学受験に特化した専属のエリートAIパートナーです。
@@ -1240,7 +1116,6 @@ ${reflection || "特になし。"}
   window.onload = function() {
     loadData();
     updateSubSubjectOptions();
-    renderUnitSelectOptions();
     updateTaskSelectOptions();
     initCharts();
     renderLogList();
