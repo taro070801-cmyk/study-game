@@ -80,15 +80,17 @@
       display: flex;
       gap: 10px;
       margin-bottom: 15px;
+      flex-wrap: wrap;
     }
 
     .tab-btn {
       flex: 1;
+      min-width: 180px;
       padding: 12px;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: bold;
       color: var(--text-sub);
       cursor: pointer;
@@ -222,13 +224,11 @@
       transition: width 0.5s ease-in-out, background-color 0.4s ease;
     }
 
-    /* 通常カラー定義 */
     .fill-english { background-color: var(--subject-english); }
     .fill-japanese { background-color: var(--subject-japanese); }
     .fill-history { background-color: var(--subject-history); }
     .fill-other { background-color: var(--subject-other); }
 
-    /* 達成（MAX）時の深い濃色定義 */
     .fill-english.completed { background-color: var(--subject-english-completed); }
     .fill-japanese.completed { background-color: var(--subject-japanese-completed); }
     .fill-history.completed { background-color: var(--subject-history-completed); }
@@ -242,7 +242,7 @@
     }
     .check-mark.active { display: inline; }
 
-    /* タスクリスト表示 */
+    /* リスト表示 */
     .task-list {
       list-style: none;
       margin-top: 10px;
@@ -277,14 +277,77 @@
     .bg-history { background-color: var(--subject-history); }
     .bg-other { background-color: var(--subject-other); }
 
-    .delete-btn {
-      background: #e2b3b3;
-      color: #5c2222;
+    .btn-group {
+      display: flex;
+      gap: 5px;
+    }
+
+    .action-btn {
       border: none;
       padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.8rem;
+    }
+    .edit-btn { background: #d0e1fd; color: #1c3d5a; }
+    .delete-btn { background: #e2b3b3; color: #5c2222; }
+
+    /* 項目設定管理エリア */
+    .setting-section {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 15px;
+    }
+
+    .setting-section h3 {
+      font-size: 0.95rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .add-inline-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .add-inline-form input { flex: 1; }
+    .add-inline-form button {
+      width: auto;
+      padding: 8px 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .item-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .item-tag {
+      background: #eaf2ed;
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .item-tag span.del-tag {
+      cursor: pointer;
+      color: #a00;
+      font-weight: bold;
+      margin-left: 4px;
     }
 
     .charts-grid-3col {
@@ -332,7 +395,7 @@
   <header>
     <div>
       <h1>早稲田攻略 戦略ナビゲーター</h1>
-      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / 登録済み教材選択 & 達成時深色ハイライト機能</p>
+      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / 項目編集・カスタマイズ対応版</p>
     </div>
     <div class="api-key-box">
       <label for="api-key" style="margin:0; font-size:0.8rem;">Gemini API Key:</label>
@@ -343,89 +406,64 @@
   <div class="tab-menu">
     <button class="tab-btn active" onclick="switchTab('task-page')">1. タスク管理 & 日々の記録</button>
     <button class="tab-btn" onclick="switchTab('partner-page')">2. 専属AIパートナー & 分析</button>
+    <button class="tab-btn" onclick="switchTab('setting-page')">3. 項目・教材マスタ編集</button>
   </div>
 
   <!-- PAGE 1: タスク管理 & 記録 -->
   <div id="task-page" class="tab-content active">
-    <!-- 科目別の進捗目標バー -->
     <div class="card">
       <h2>本日の科目別目標達成度</h2>
       <div class="subject-goal-grid">
-        <!-- 英語 -->
         <div class="goal-card">
           <div class="goal-header">
             <span>英語</span>
-            <span>
-              <span id="val-english">0</span> / <span id="max-display-english">50</span>
-              <span id="check-english" class="check-mark">✔ (達成!)</span>
-            </span>
+            <span><span id="val-english">0</span> / <span id="max-display-english">50</span> <span id="check-english" class="check-mark">✔ (達成!)</span></span>
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
             <input type="number" id="goal-english" value="50" onchange="updateGoalProgress(); saveData();">
           </div>
-          <div class="progress-bar-bg">
-            <div id="bar-english" class="progress-bar-fill fill-english"></div>
-          </div>
+          <div class="progress-bar-bg"><div id="bar-english" class="progress-bar-fill fill-english"></div></div>
         </div>
 
-        <!-- 国語 -->
         <div class="goal-card">
           <div class="goal-header">
             <span>国語</span>
-            <span>
-              <span id="val-japanese">0</span> / <span id="max-display-japanese">30</span>
-              <span id="check-japanese" class="check-mark">✔ (達成!)</span>
-            </span>
+            <span><span id="val-japanese">0</span> / <span id="max-display-japanese">30</span> <span id="check-japanese" class="check-mark">✔ (達成!)</span></span>
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
             <input type="number" id="goal-japanese" value="30" onchange="updateGoalProgress(); saveData();">
           </div>
-          <div class="progress-bar-bg">
-            <div id="bar-japanese" class="progress-bar-fill fill-japanese"></div>
-          </div>
+          <div class="progress-bar-bg"><div id="bar-japanese" class="progress-bar-fill fill-japanese"></div></div>
         </div>
 
-        <!-- 日本史 -->
         <div class="goal-card">
           <div class="goal-header">
             <span>日本史</span>
-            <span>
-              <span id="val-history">0</span> / <span id="max-display-history">40</span>
-              <span id="check-history" class="check-mark">✔ (達成!)</span>
-            </span>
+            <span><span id="val-history">0</span> / <span id="max-display-history">40</span> <span id="check-history" class="check-mark">✔ (達成!)</span></span>
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
             <input type="number" id="goal-history" value="40" onchange="updateGoalProgress(); saveData();">
           </div>
-          <div class="progress-bar-bg">
-            <div id="bar-history" class="progress-bar-fill fill-history"></div>
-          </div>
+          <div class="progress-bar-bg"><div id="bar-history" class="progress-bar-fill fill-history"></div></div>
         </div>
 
-        <!-- その他 -->
         <div class="goal-card">
           <div class="goal-header">
             <span>その他</span>
-            <span>
-              <span id="val-other">0</span> / <span id="max-display-other">10</span>
-              <span id="check-other" class="check-mark">✔ (達成!)</span>
-            </span>
+            <span><span id="val-other">0</span> / <span id="max-display-other">10</span> <span id="check-other" class="check-mark">✔ (達成!)</span></span>
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
             <input type="number" id="goal-other" value="10" onchange="updateGoalProgress(); saveData();">
           </div>
-          <div class="progress-bar-bg">
-            <div id="bar-other" class="progress-bar-fill fill-other"></div>
-          </div>
+          <div class="progress-bar-bg"><div id="bar-other" class="progress-bar-fill fill-other"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- 学習ログ追加フォーム -->
     <div class="card">
       <h2>新規学習タスクの登録 / 学習ログ追加</h2>
       <form id="task-form">
@@ -438,16 +476,12 @@
         </select>
 
         <label for="task-sub-subject">分類（内訳）</label>
-        <select id="task-sub-subject">
-          <!-- JSで自動切替 -->
-        </select>
+        <select id="task-sub-subject"></select>
 
         <div class="inline-inputs" style="margin-top:10px;">
           <div>
-            <label for="task-select">教材・タスクを選択（または直接追加）</label>
-            <select id="task-select" onchange="handleTaskSelectChange()">
-              <!-- 登録済みアイテム -->
-            </select>
+            <label for="task-select">教材名</label>
+            <select id="task-select" onchange="handleTaskSelectChange()"></select>
             <input type="text" id="task-name-custom" placeholder="新規教材名を入力" style="display:none; margin-top:5px;">
           </div>
           <div>
@@ -456,13 +490,7 @@
           </div>
           <div>
             <label for="task-unit">単位</label>
-            <select id="task-unit-select" onchange="handleUnitSelectChange()">
-              <option value="p">p (ページ)</option>
-              <option value="題">題</option>
-              <option value="単語">単語</option>
-              <option value="章">章</option>
-              <option value="__NEW__">＋ 新しい単位を追加...</option>
-            </select>
+            <select id="task-unit-select" onchange="handleUnitSelectChange()"></select>
             <input type="text" id="task-unit-custom" placeholder="例: 講" style="display:none; margin-top:5px;">
           </div>
         </div>
@@ -472,7 +500,7 @@
     </div>
 
     <div class="card">
-      <h2>学習ログ・編集一覧</h2>
+      <h2>学習ログ一覧</h2>
       <ul id="log-list" class="task-list"></ul>
     </div>
   </div>
@@ -489,40 +517,82 @@
     <div class="charts-grid-3col">
       <div class="card">
         <h2>全体バランス</h2>
-        <div class="chart-container">
-          <canvas id="pieChartMain"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="pieChartMain"></canvas></div>
       </div>
       <div class="card">
         <h2>英語の内訳</h2>
-        <div class="chart-container">
-          <canvas id="pieChartEnglish"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="pieChartEnglish"></canvas></div>
       </div>
       <div class="card">
         <h2>国語の内訳</h2>
-        <div class="chart-container">
-          <canvas id="pieChartJapanese"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="pieChartJapanese"></canvas></div>
       </div>
     </div>
 
     <div class="card">
-      <div id="ai-pie-advice" class="ai-advice-box">
-        データが蓄積されると、ここにAIからの自動バランスアドバイスが表示されます。
-      </div>
+      <div id="ai-pie-advice" class="ai-advice-box">データが蓄積されると、ここにAIからの自動バランスアドバイスが表示されます。</div>
     </div>
 
     <div class="card">
       <h2>早稲田専門エリートAIパートナーによる個別分析</h2>
       <label for="user-reflection">本日の振り返り・相談・つまずき（自由記述）</label>
       <textarea id="user-reflection" placeholder="例: 英語長文の解釈で引っかかり時間がかかった。日本史との比率調整についてもアドバイスがほしい。"></textarea>
-
       <button type="button" class="primary-btn" id="ai-btn" onclick="requestAiAnalysis()">AIパートナーの多角分析を依頼する</button>
-
       <h3 style="font-size:0.95rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">AIレポート出力結果</h3>
-      <div id="ai-report-output" class="report-output">
-AIキーを設定し、相談内容を入力してボタンを押すと、記録された学習データと各分野の比率を踏まえた個別アドバイスが生成されます。
+      <div id="ai-report-output" class="report-output">AIキーを設定し、相談内容を入力してボタンを押すと、記録された学習データと各分野の比率を踏まえた個別アドバイスが生成されます。</div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: 項目・教材マスタ編集 (NEW) -->
+  <div id="setting-page" class="tab-content">
+    <div class="card">
+      <h2>項目・分類・教材マスタの設定・編集</h2>
+      <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px;">ドロップダウンに表示される分類（内訳）や教材リストを追加・編集・削除できます。</p>
+
+      <!-- 分類編集 -->
+      <div class="setting-section">
+        <h3>1. 各科目の分類（内訳）設定</h3>
+        <label>対象科目を選択</label>
+        <select id="setting-subject-sub" onchange="renderSubSubjectSetting()">
+          <option value="英語">英語</option>
+          <option value="国語">国語</option>
+          <option value="日本史">日本史</option>
+          <option value="その他">その他</option>
+        </select>
+        
+        <div class="add-inline-form">
+          <input type="text" id="new-sub-input" placeholder="新しい分類を追加 (例: 英作文)">
+          <button type="button" onclick="addSubSubjectSetting()">追加</button>
+        </div>
+        <div id="sub-subject-tags" class="item-tag-list"></div>
+      </div>
+
+      <!-- 教材編集 -->
+      <div class="setting-section">
+        <h3>2. 登録済み教材リスト設定</h3>
+        <label>対象科目を選択</label>
+        <select id="setting-subject-task" onchange="renderTaskSetting()">
+          <option value="英語">英語</option>
+          <option value="国語">国語</option>
+          <option value="日本史">日本史</option>
+          <option value="その他">その他</option>
+        </select>
+        
+        <div class="add-inline-form">
+          <input type="text" id="new-task-input" placeholder="新しい教材名を追加">
+          <button type="button" onclick="addTaskSetting()">追加</button>
+        </div>
+        <div id="task-tags" class="item-tag-list"></div>
+      </div>
+
+      <!-- 単位編集 -->
+      <div class="setting-section">
+        <h3>3. 単位リスト設定</h3>
+        <div class="add-inline-form">
+          <input type="text" id="new-unit-input" placeholder="新しい単位を追加 (例: 講, チャプター)">
+          <button type="button" onclick="addUnitSetting()">追加</button>
+        </div>
+        <div id="unit-tags" class="item-tag-list"></div>
       </div>
     </div>
   </div>
@@ -536,6 +606,12 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     '日本史': ['東進一問一答', '実況中継1'],
     'その他': ['小論文演習']
   };
+  let savedSubSubjects = {
+    '英語': ['単語', '文法', '解釈', '長文'],
+    '国語': ['現代文', '古文', '漢文'],
+    '日本史': ['通史', '文化史', '史料', '一問一答'],
+    'その他': ['その他']
+  };
   let customUnits = ['p', '題', '単語', '章'];
 
   let barChart, pieChartMain, pieChartEnglish, pieChartJapanese;
@@ -543,6 +619,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
   function saveData() {
     localStorage.setItem('waseda_study_logs', JSON.stringify(studyLogs));
     localStorage.setItem('waseda_saved_tasks', JSON.stringify(savedTasks));
+    localStorage.setItem('waseda_sub_subjects', JSON.stringify(savedSubSubjects));
     localStorage.setItem('waseda_custom_units', JSON.stringify(customUnits));
     localStorage.setItem('waseda_api_key', document.getElementById('api-key').value);
     
@@ -561,6 +638,9 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
 
     const tasks = localStorage.getItem('waseda_saved_tasks');
     if (tasks) savedTasks = JSON.parse(tasks);
+
+    const subs = localStorage.getItem('waseda_sub_subjects');
+    if (subs) savedSubSubjects = JSON.parse(subs);
 
     const units = localStorage.getItem('waseda_custom_units');
     if (units) customUnits = JSON.parse(units);
@@ -588,6 +668,10 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     if (tabId === 'partner-page') {
       updateCharts();
       analyzeSubjectBalance();
+    } else if (tabId === 'setting-page') {
+      renderSubSubjectSetting();
+      renderTaskSetting();
+      renderUnitSetting();
     }
   }
 
@@ -596,17 +680,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     const subSelect = document.getElementById('task-sub-subject');
     subSelect.innerHTML = '';
 
-    let options = [];
-    if (subject === '英語') {
-      options = ['単語', '文法', '解釈', '長文'];
-    } else if (subject === '国語') {
-      options = ['現代文', '古文', '漢文'];
-    } else if (subject === '日本史') {
-      options = ['通史', '文化史', '史料', '一問一答'];
-    } else {
-      options = ['その他'];
-    }
-
+    const options = savedSubSubjects[subject] || ['その他'];
     options.forEach(opt => {
       const el = document.createElement('option');
       el.value = opt;
@@ -682,6 +756,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     }
   }
 
+  /* タスクログ追加 */
   function addStudyLog() {
     const subject = document.getElementById('task-subject').value;
     const subSubject = document.getElementById('task-sub-subject').value;
@@ -695,9 +770,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
       if (!taskName) return alert('教材名を入力してください。');
       
       if (!savedTasks[subject]) savedTasks[subject] = [];
-      if (!savedTasks[subject].includes(taskName)) {
-        savedTasks[subject].push(taskName);
-      }
+      if (!savedTasks[subject].includes(taskName)) savedTasks[subject].push(taskName);
     } else {
       taskName = taskSelect.value;
     }
@@ -712,9 +785,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     if (unitSelect.value === '__NEW__') {
       unitName = customUnitInput.value.trim();
       if (!unitName) return alert('単位を入力してください。');
-      if (!customUnits.includes(unitName)) {
-        customUnits.push(unitName);
-      }
+      if (!customUnits.includes(unitName)) customUnits.push(unitName);
     } else {
       unitName = unitSelect.value;
     }
@@ -735,7 +806,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     saveData();
     renderLogList();
     updateGoalProgress();
-    
     renderUnitSelectOptions();
     updateTaskSelectOptions();
     customTaskInput.value = '';
@@ -749,10 +819,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     saveData();
     renderLogList();
     updateGoalProgress();
-    if (document.getElementById('partner-page').classList.contains('active')) {
-      updateCharts();
-      analyzeSubjectBalance();
-    }
   }
 
   function renderLogList() {
@@ -778,13 +844,15 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
           <strong>${log.name}</strong>
           <span>${log.amount} ${log.unit} (${log.date})</span>
         </div>
-        <button class="delete-btn" onclick="deleteLog(${log.id})">削除</button>
+        <div class="btn-group">
+          <button class="action-btn delete-btn" onclick="deleteLog(${log.id})">削除</button>
+        </div>
       `;
       listEl.appendChild(li);
     });
   }
 
-  // 進捗バーの更新 & 達成（MAX）時の色変化ロジック
+  /* 進捗バー更新 */
   function updateGoalProgress() {
     const subjects = [
       { key: 'english', label: '英語' },
@@ -811,17 +879,125 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
 
       const checkMark = document.getElementById(`check-${sub.key}`);
 
-      // 目標達成時の判定（100%以上）
       if (todayVal >= goalMax && goalMax > 0) {
         checkMark.classList.add('active');
-        fillBar.classList.add('completed'); // ゲージ色を深い濃色に変更
+        fillBar.classList.add('completed');
       } else {
         checkMark.classList.remove('active');
-        fillBar.classList.remove('completed'); // 通常色に戻す
+        fillBar.classList.remove('completed');
       }
     });
   }
 
+  /* マスタ設定管理関数 */
+  function renderSubSubjectSetting() {
+    const subject = document.getElementById('setting-subject-sub').value;
+    const container = document.getElementById('sub-subject-tags');
+    container.innerHTML = '';
+
+    const list = savedSubSubjects[subject] || [];
+    list.forEach((item, index) => {
+      const tag = document.createElement('div');
+      tag.className = 'item-tag';
+      tag.innerHTML = `${item} <span class="del-tag" onclick="removeSubSubjectSetting('${subject}', ${index})">✕</span>`;
+      container.appendChild(tag);
+    });
+  }
+
+  function addSubSubjectSetting() {
+    const subject = document.getElementById('setting-subject-sub').value;
+    const input = document.getElementById('new-sub-input');
+    const val = input.value.trim();
+
+    if (!val) return;
+    if (!savedSubSubjects[subject]) savedSubSubjects[subject] = [];
+    if (!savedSubSubjects[subject].includes(val)) {
+      savedSubSubjects[subject].push(val);
+      saveData();
+      renderSubSubjectSetting();
+      updateSubSubjectOptions();
+      input.value = '';
+    }
+  }
+
+  function removeSubSubjectSetting(subject, index) {
+    savedSubSubjects[subject].splice(index, 1);
+    saveData();
+    renderSubSubjectSetting();
+    updateSubSubjectOptions();
+  }
+
+  function renderTaskSetting() {
+    const subject = document.getElementById('setting-subject-task').value;
+    const container = document.getElementById('task-tags');
+    container.innerHTML = '';
+
+    const list = savedTasks[subject] || [];
+    list.forEach((item, index) => {
+      const tag = document.createElement('div');
+      tag.className = 'item-tag';
+      tag.innerHTML = `${item} <span class="del-tag" onclick="removeTaskSetting('${subject}', ${index})">✕</span>`;
+      container.appendChild(tag);
+    });
+  }
+
+  function addTaskSetting() {
+    const subject = document.getElementById('setting-subject-task').value;
+    const input = document.getElementById('new-task-input');
+    const val = input.value.trim();
+
+    if (!val) return;
+    if (!savedTasks[subject]) savedTasks[subject] = [];
+    if (!savedTasks[subject].includes(val)) {
+      savedTasks[subject].push(val);
+      saveData();
+      renderTaskSetting();
+      updateTaskSelectOptions();
+      input.value = '';
+    }
+  }
+
+  function removeTaskSetting(subject, index) {
+    savedTasks[subject].splice(index, 1);
+    saveData();
+    renderTaskSetting();
+    updateTaskSelectOptions();
+  }
+
+  function renderUnitSetting() {
+    const container = document.getElementById('unit-tags');
+    container.innerHTML = '';
+
+    customUnits.forEach((item, index) => {
+      const tag = document.createElement('div');
+      tag.className = 'item-tag';
+      tag.innerHTML = `${item} <span class="del-tag" onclick="removeUnitSetting(${index})">✕</span>`;
+      container.appendChild(tag);
+    });
+  }
+
+  function addUnitSetting() {
+    const input = document.getElementById('new-unit-input');
+    const val = input.value.trim();
+
+    if (!val) return;
+    if (!customUnits.includes(val)) {
+      customUnits.push(val);
+      saveData();
+      renderUnitSetting();
+      renderUnitSelectOptions();
+      input.value = '';
+    }
+  }
+
+  function removeUnitSetting(index) {
+    customUnits.splice(index, 1);
+    saveData();
+    renderUnitSetting();
+    renderUnitSelectOptions();
+  }
+
+  /* Chart & AI 関連 */
   function initCharts() {
     const ctxBar = document.getElementById('barChart').getContext('2d');
     barChart = new Chart(ctxBar, {
@@ -969,7 +1145,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
 
     const systemInstruction = `
 あなたは早稲田大学受験に特化した専属のエリートAIパートナーです。
-英語（単語・文法・解釈・長文）や国語（現代文・古文・漢文）の細分化された学習バランスに言及しながらアドバイスしてください。
+英語や国語などの細分化された学習バランスに言及しながらアドバイスしてください。
 
 【出力構成】
 1. 思考プロセスの弱点分析
