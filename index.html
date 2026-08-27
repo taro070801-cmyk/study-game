@@ -155,38 +155,73 @@
 
     button.primary-btn:hover { opacity: 0.9; }
 
-    /* 横向き目標プログレスバー */
-    .goal-progress-container {
-      margin-top: 10px;
+    /* 科目別横向き進捗バー */
+    .subject-goal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
     }
+
+    @media (max-width: 768px) {
+      .subject-goal-grid { grid-template-columns: 1fr; }
+    }
+
+    .goal-card {
+      background: #ffffff;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
     .goal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 6px;
       font-weight: bold;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
+
+    .goal-input-inline {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+    }
+
+    .goal-input-inline input {
+      width: 70px;
+      padding: 4px 6px;
+      font-size: 0.85rem;
+    }
+
     .progress-bar-bg {
       width: 100%;
-      height: 24px;
+      height: 18px;
       background-color: #dbe5dd;
-      border-radius: 12px;
+      border-radius: 10px;
       overflow: hidden;
       position: relative;
     }
+
     .progress-bar-fill {
       height: 100%;
       width: 0%;
-      background-color: var(--primary);
-      border-radius: 12px;
+      border-radius: 10px;
       transition: width 0.5s ease-in-out;
     }
+
+    .fill-english { background-color: var(--subject-english); }
+    .fill-japanese { background-color: var(--subject-japanese); }
+    .fill-history { background-color: var(--subject-history); }
+    .fill-other { background-color: var(--subject-other); }
+
     .check-mark {
       color: #27ae60;
-      font-size: 1.2rem;
+      font-size: 1rem;
       display: none;
-      margin-left: 5px;
+      margin-left: 4px;
     }
     .check-mark.active { display: inline; }
 
@@ -234,12 +269,6 @@
       font-size: 0.8rem;
     }
 
-    .charts-grid-2col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
     .charts-grid-3col {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -247,7 +276,7 @@
     }
 
     @media (max-width: 850px) {
-      .charts-grid-2col, .charts-grid-3col { grid-template-columns: 1fr; }
+      .charts-grid-3col { grid-template-columns: 1fr; }
     }
 
     .chart-container {
@@ -285,7 +314,7 @@
   <header>
     <div>
       <h1>早稲田攻略 戦略ナビゲーター</h1>
-      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / 分野別内訳 & 目標達成進捗対応</p>
+      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / 科目別目標管理 & 細長バー推移グラフ</p>
     </div>
     <div class="api-key-box">
       <label for="api-key" style="margin:0; font-size:0.8rem;">Gemini API Key:</label>
@@ -300,25 +329,80 @@
 
   <!-- PAGE 1: タスク管理 & 記録 -->
   <div id="task-page" class="tab-content active">
-    <!-- 横向き目標進捗バー -->
+    <!-- 科目別の進捗目標バー（4科目） -->
     <div class="card">
-      <h2>本日の目標達成度 (横向き進捗バー)</h2>
-      <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-        <label for="daily-goal-input" style="margin:0; white-space:nowrap;">1日の目標量:</label>
-        <input type="number" id="daily-goal-input" value="100" style="width:120px;" onchange="updateGoalProgress()">
-        <span style="font-size:0.85rem; color:var(--text-sub);">※全科目の合計目標数値</span>
-      </div>
-      
-      <div class="goal-progress-container">
-        <div class="goal-header">
-          <span>進捗状況: <span id="goal-current-val">0</span> / <span id="goal-max-val">100</span></span>
-          <span>
-            <span id="goal-percentage">0%</span>
-            <span id="goal-check" class="check-mark">✔ (目標達成!)</span>
-          </span>
+      <h2>本日の科目別目標達成度</h2>
+      <div class="subject-goal-grid">
+        <!-- 英語 -->
+        <div class="goal-card">
+          <div class="goal-header">
+            <span>英語</span>
+            <span>
+              <span id="val-english">0</span> / <span id="max-display-english">50</span>
+              <span id="check-english" class="check-mark">✔ (達成!)</span>
+            </span>
+          </div>
+          <div class="goal-input-inline">
+            <label style="margin:0;">目標:</label>
+            <input type="number" id="goal-english" value="50" onchange="updateGoalProgress()">
+          </div>
+          <div class="progress-bar-bg">
+            <div id="bar-english" class="progress-bar-fill fill-english"></div>
+          </div>
         </div>
-        <div class="progress-bar-bg">
-          <div id="goal-bar-fill" class="progress-bar-fill"></div>
+
+        <!-- 国語 -->
+        <div class="goal-card">
+          <div class="goal-header">
+            <span>国語</span>
+            <span>
+              <span id="val-japanese">0</span> / <span id="max-display-japanese">30</span>
+              <span id="check-japanese" class="check-mark">✔ (達成!)</span>
+            </span>
+          </div>
+          <div class="goal-input-inline">
+            <label style="margin:0;">目標:</label>
+            <input type="number" id="goal-japanese" value="30" onchange="updateGoalProgress()">
+          </div>
+          <div class="progress-bar-bg">
+            <div id="bar-japanese" class="progress-bar-fill fill-japanese"></div>
+          </div>
+        </div>
+
+        <!-- 日本史 -->
+        <div class="goal-card">
+          <div class="goal-header">
+            <span>日本史</span>
+            <span>
+              <span id="val-history">0</span> / <span id="max-display-history">40</span>
+              <span id="check-history" class="check-mark">✔ (達成!)</span>
+            </span>
+          </div>
+          <div class="goal-input-inline">
+            <label style="margin:0;">目標:</label>
+            <input type="number" id="goal-history" value="40" onchange="updateGoalProgress()">
+          </div>
+          <div class="progress-bar-bg">
+            <div id="bar-history" class="progress-bar-fill fill-history"></div>
+          </div>
+        </div>
+
+        <!-- その他 -->
+        <div class="goal-card">
+          <div class="goal-header">
+            <span>その他</span>
+            <span>
+              <span id="val-other">0</span> / <span id="max-display-other">10</span>
+              <span id="check-other" class="check-mark">✔ (達成!)</span>
+            </span>
+          </div>
+          <div class="goal-input-inline">
+            <label style="margin:0;">目標:</label>
+            <input type="number" id="goal-other" value="10" onchange="updateGoalProgress()">
+          </div>
+          <div class="progress-bar-bg">
+            <div id="bar-other" class="progress-bar-fill fill-other"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -367,13 +451,13 @@
   <!-- PAGE 2: AIパートナー & 分析 -->
   <div id="partner-page" class="tab-content">
     <div class="card">
-      <h2>日々の進捗推移（科目別色分け累積グラフ）</h2>
+      <h2>日々の進捗推移（細軸科目別積み上げグラフ）</h2>
       <div class="chart-container" style="height:260px;">
         <canvas id="barChart"></canvas>
       </div>
     </div>
 
-    <!-- 円グラフ 3連配置（全体 / 英語内訳 / 国語内訳） -->
+    <!-- 円グラフ 3連配置 -->
     <div class="charts-grid-3col">
       <div class="card">
         <h2>全体バランス</h2>
@@ -433,7 +517,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     }
   }
 
-  // 科目・細分化（英語：単語・文法・解釈・長文 / 国語：現代文・古文・漢文）
   function updateSubSubjectOptions() {
     const subject = document.getElementById('task-subject').value;
     const subSelect = document.getElementById('task-sub-subject');
@@ -524,49 +607,52 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     });
   }
 
-  // 横向き進捗バー更新（目標達成でチェックマーク表示）
+  // 各科目ごとの進捗バー更新
   function updateGoalProgress() {
-    const goalMax = parseFloat(document.getElementById('daily-goal-input').value) || 100;
-    
-    // 今日の日付ログのみ集計
+    const subjects = [
+      { key: 'english', label: '英語' },
+      { key: 'japanese', label: '国語' },
+      { key: 'history', label: '日本史' },
+      { key: 'other', label: 'その他' }
+    ];
+
     const today = new Date();
     const dateStr = `${today.getMonth()+1}/${today.getDate()}`;
-    const todayTotal = studyLogs
-      .filter(log => log.date === dateStr)
-      .reduce((sum, log) => sum + log.amount, 0);
 
-    document.getElementById('goal-current-val').innerText = todayTotal;
-    document.getElementById('goal-max-val').innerText = goalMax;
+    subjects.forEach(sub => {
+      const goalMax = parseFloat(document.getElementById(`goal-${sub.key}`).value) || 0;
+      const todayVal = studyLogs
+        .filter(log => log.date === dateStr && log.subject === sub.label)
+        .reduce((sum, log) => sum + log.amount, 0);
 
-    const percentage = Math.min(Math.round((todayTotal / goalMax) * 100), 100);
-    document.getElementById('goal-percentage').innerText = `${percentage}%`;
+      document.getElementById(`val-${sub.key}`).innerText = todayVal;
+      document.getElementById(`max-display-${sub.key}`).innerText = goalMax;
 
-    const fillBar = document.getElementById('goal-bar-fill');
-    fillBar.style.width = `${percentage}%`;
+      const percentage = goalMax > 0 ? Math.min(Math.round((todayVal / goalMax) * 100), 100) : 0;
+      const fillBar = document.getElementById(`bar-${sub.key}`);
+      fillBar.style.width = `${percentage}%`;
 
-    const checkMark = document.getElementById('goal-check');
-    if (todayTotal >= goalMax && goalMax > 0) {
-      checkMark.classList.add('active');
-      fillBar.style.backgroundColor = '#27ae60'; // 達成時緑
-    } else {
-      checkMark.classList.remove('active');
-      fillBar.style.backgroundColor = 'var(--primary)';
-    }
+      const checkMark = document.getElementById(`check-${sub.key}`);
+      if (todayVal >= goalMax && goalMax > 0) {
+        checkMark.classList.add('active');
+      } else {
+        checkMark.classList.remove('active');
+      }
+    });
   }
 
-  // Chart.js グラフ（科目色分け積み上げバー＆分野別円グラフ）
+  // Chart.js（バーの太さを細く設定: barPercentage & categoryPercentage）
   function initCharts() {
-    // 積み上げ棒グラフ（英語:ピンク / 国語:オレンジ / 日本史:緑）
     const ctxBar = document.getElementById('barChart').getContext('2d');
     barChart = new Chart(ctxBar, {
       type: 'bar',
       data: {
         labels: [],
         datasets: [
-          { label: '英語', data: [], backgroundColor: '#f4c2c2' },
-          { label: '国語', data: [], backgroundColor: '#f8cb9c' },
-          { label: '日本史', data: [], backgroundColor: '#b5dba4' },
-          { label: 'その他', data: [], backgroundColor: '#d1d8e0' }
+          { label: '英語', data: [], backgroundColor: '#f4c2c2', barPercentage: 0.35, categoryPercentage: 0.6 },
+          { label: '国語', data: [], backgroundColor: '#f8cb9c', barPercentage: 0.35, categoryPercentage: 0.6 },
+          { label: '日本史', data: [], backgroundColor: '#b5dba4', barPercentage: 0.35, categoryPercentage: 0.6 },
+          { label: 'その他', data: [], backgroundColor: '#d1d8e0', barPercentage: 0.35, categoryPercentage: 0.6 }
         ]
       },
       options: {
@@ -617,7 +703,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
   function updateCharts() {
     const dates = [...new Set(studyLogs.map(l => l.date))];
     
-    // 積み上げデータ作成
     const engData = [], jpnData = [], hisData = [], othData = [];
 
     dates.forEach(d => {
@@ -645,7 +730,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     pieChartMain.data.datasets[0].data = [mainTot.eng, mainTot.jpn, mainTot.his, mainTot.oth];
     pieChartMain.update();
 
-    // 英語円グラフ（単語, 文法, 解釈, 長文）
+    // 英語円グラフ
     const engLogs = studyLogs.filter(l => l.subject === '英語');
     pieChartEnglish.data.datasets[0].data = [
       engLogs.filter(l => l.subSubject === '単語').reduce((s, l) => s + l.amount, 0),
@@ -655,7 +740,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     ];
     pieChartEnglish.update();
 
-    // 国語円グラフ（現代文, 古文, 漢文）
+    // 国語円グラフ
     const jpnLogs = studyLogs.filter(l => l.subject === '国語');
     pieChartJapanese.data.datasets[0].data = [
       jpnLogs.filter(l => l.subSubject === '現代文').reduce((s, l) => s + l.amount, 0),
@@ -679,13 +764,11 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     
     let advice = `【全体・分野の偏りチェック】\n`;
 
-    // 英語の分野チェック
     const engLong = studyLogs.filter(l => l.subject === '英語' && l.subSubject === '長文').reduce((s, l) => s + l.amount, 0);
     if (eng > 0 && (engLong / eng) < 0.3) {
       advice += "💡 英語は単語・解釈だけでなく『長文』の演習比率をもう少し増やすと早稲田実戦力に繋がります。\n";
     }
 
-    // 国語の分野チェック
     const jpnAncient = studyLogs.filter(l => l.subject === '国語' && l.subSubject === '古文').reduce((s, l) => s + l.amount, 0);
     if (jpn > 0 && jpnAncient === 0) {
       advice += "💡 国語で『古文』の記録がまだありません。古文単語・文法の基盤を早めに固めましょう。";
