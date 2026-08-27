@@ -16,9 +16,9 @@
       --border-color: #c4d1c7;
       
       /* 科目専用の優しい色合い */
-      --subject-english: #f4c2c2;   /* 英語：柔らかいピンク */
-      --subject-japanese: #f8cb9c;  /* 国語：柔らかいオレンジ */
-      --subject-history: #b5dba4;   /* 日本史：柔らかい緑 */
+      --subject-english: #f4c2c2;   /* 英語：ピンク */
+      --subject-japanese: #f8cb9c;  /* 国語：オレンジ */
+      --subject-history: #b5dba4;   /* 日本史：緑 */
       --subject-other: #d1d8e0;     /* その他 */
     }
 
@@ -39,7 +39,6 @@
       margin: 0 auto;
     }
 
-    /* ヘッダー＆API設定 */
     header {
       background: var(--card-bg);
       padding: 20px;
@@ -71,7 +70,6 @@
       font-size: 0.85rem;
     }
 
-    /* タブ切り替え（タスク管理 vs AIパートナー） */
     .tab-menu {
       display: flex;
       gap: 10px;
@@ -116,7 +114,6 @@
       border-bottom: 2px solid var(--border-color);
     }
 
-    /* フォーム・入力パーツ */
     label {
       display: block;
       font-size: 0.85rem;
@@ -157,6 +154,41 @@
     }
 
     button.primary-btn:hover { opacity: 0.9; }
+
+    /* 横向き目標プログレスバー */
+    .goal-progress-container {
+      margin-top: 10px;
+    }
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 24px;
+      background-color: #dbe5dd;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--primary);
+      border-radius: 12px;
+      transition: width 0.5s ease-in-out;
+    }
+    .check-mark {
+      color: #27ae60;
+      font-size: 1.2rem;
+      display: none;
+      margin-left: 5px;
+    }
+    .check-mark.active { display: inline; }
 
     /* タスクリスト表示 */
     .task-list {
@@ -202,24 +234,28 @@
       font-size: 0.8rem;
     }
 
-    /* グラフグリッド */
-    .charts-grid {
+    .charts-grid-2col {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
 
-    @media (max-width: 768px) {
-      .charts-grid { grid-template-columns: 1fr; }
+    .charts-grid-3col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+    }
+
+    @media (max-width: 850px) {
+      .charts-grid-2col, .charts-grid-3col { grid-template-columns: 1fr; }
     }
 
     .chart-container {
       position: relative;
-      height: 250px;
+      height: 220px;
       width: 100%;
     }
 
-    /* AIレポート表示領域 */
     .report-output {
       background: #ffffff;
       border-left: 4px solid var(--primary);
@@ -246,11 +282,10 @@
 <body>
 
 <div class="container">
-  <!-- ヘッダー -->
   <header>
     <div>
       <h1>早稲田攻略 戦略ナビゲーター</h1>
-      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / タスク自由単位・学習比率自動分析</p>
+      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / 分野別内訳 & 目標達成進捗対応</p>
     </div>
     <div class="api-key-box">
       <label for="api-key" style="margin:0; font-size:0.8rem;">Gemini API Key:</label>
@@ -258,7 +293,6 @@
     </div>
   </header>
 
-  <!-- ページ切替タブ -->
   <div class="tab-menu">
     <button class="tab-btn active" onclick="switchTab('task-page')">1. タスク管理 & 日々の記録</button>
     <button class="tab-btn" onclick="switchTab('partner-page')">2. 専属AIパートナー & 分析</button>
@@ -266,6 +300,29 @@
 
   <!-- PAGE 1: タスク管理 & 記録 -->
   <div id="task-page" class="tab-content active">
+    <!-- 横向き目標進捗バー -->
+    <div class="card">
+      <h2>本日の目標達成度 (横向き進捗バー)</h2>
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+        <label for="daily-goal-input" style="margin:0; white-space:nowrap;">1日の目標量:</label>
+        <input type="number" id="daily-goal-input" value="100" style="width:120px;" onchange="updateGoalProgress()">
+        <span style="font-size:0.85rem; color:var(--text-sub);">※全科目の合計目標数値</span>
+      </div>
+      
+      <div class="goal-progress-container">
+        <div class="goal-header">
+          <span>進捗状況: <span id="goal-current-val">0</span> / <span id="goal-max-val">100</span></span>
+          <span>
+            <span id="goal-percentage">0%</span>
+            <span id="goal-check" class="check-mark">✔ (目標達成!)</span>
+          </span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="goal-bar-fill" class="progress-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <h2>新規学習タスクの登録 / 学習ログ追加</h2>
       <form id="task-form">
@@ -277,25 +334,23 @@
           <option value="その他">その他</option>
         </select>
 
-        <label for="task-sub-subject">細分化（任意）</label>
+        <label for="task-sub-subject">分類（内訳）</label>
         <select id="task-sub-subject">
-          <option value="英語全体">英語全体</option>
-          <option value="長文読解">長文読解</option>
-          <option value="文法・単語">文法・単語</option>
+          <!-- JSで自動切替 -->
         </select>
 
         <div class="inline-inputs" style="margin-top:10px;">
           <div>
             <label for="task-name">教材・タスク名</label>
-            <input type="text" id="task-name" placeholder="例: システム英単語">
+            <input type="text" id="task-name" placeholder="例: ポラリス1">
           </div>
           <div>
             <label for="task-amount">進めた量</label>
-            <input type="number" id="task-amount" value="50" min="1">
+            <input type="number" id="task-amount" value="10" min="1">
           </div>
           <div>
-            <label for="task-unit">単位（自由入力）</label>
-            <input type="text" id="task-unit" placeholder="例: 単語, p, 題">
+            <label for="task-unit">単位</label>
+            <input type="text" id="task-unit" placeholder="例: p, 題, 単語">
           </div>
         </div>
 
@@ -303,60 +358,68 @@
       </form>
     </div>
 
-    <!-- 登録済み記録一覧 -->
     <div class="card">
       <h2>学習ログ・編集一覧</h2>
-      <ul id="log-list" class="task-list">
-        <!-- JSで動的追加（初期はゼロ） -->
-      </ul>
+      <ul id="log-list" class="task-list"></ul>
     </div>
   </div>
 
-  <!-- PAGE 2: AIパートナー & 分析（グラフ） -->
+  <!-- PAGE 2: AIパートナー & 分析 -->
   <div id="partner-page" class="tab-content">
-    <div class="charts-grid">
-      <!-- 棒グラフ：日々の推移（増減表示） -->
+    <div class="card">
+      <h2>日々の進捗推移（科目別色分け累積グラフ）</h2>
+      <div class="chart-container" style="height:260px;">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 円グラフ 3連配置（全体 / 英語内訳 / 国語内訳） -->
+    <div class="charts-grid-3col">
       <div class="card">
-        <h2>日々の進捗推移（累積棒グラフ）</h2>
+        <h2>全体バランス</h2>
         <div class="chart-container">
-          <canvas id="barChart"></canvas>
+          <canvas id="pieChartMain"></canvas>
         </div>
       </div>
-
-      <!-- 円グラフ：科目の偏り -->
       <div class="card">
-        <h2>科目の学習割合</h2>
+        <h2>英語の内訳</h2>
         <div class="chart-container">
-          <canvas id="pieChart"></canvas>
+          <canvas id="pieChartEnglish"></canvas>
         </div>
-        <div id="ai-pie-advice" class="ai-advice-box">
-          データが蓄積されると、ここにAIからの自動バランスアドバイスが表示されます。
+      </div>
+      <div class="card">
+        <h2>国語の内訳</h2>
+        <div class="chart-container">
+          <canvas id="pieChartJapanese"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- AIパートナー対話＆深層分析 -->
+    <div class="card">
+      <div id="ai-pie-advice" class="ai-advice-box">
+        データが蓄積されると、ここにAIからの自動バランスアドバイスが表示されます。
+      </div>
+    </div>
+
     <div class="card">
       <h2>早稲田専門エリートAIパートナーによる個別分析</h2>
       <label for="user-reflection">本日の振り返り・相談・つまずき（自由記述）</label>
-      <textarea id="user-reflection" placeholder="例: 日本史の文化史で知識が混同してしまう。選択肢の罠を見抜くコツを知りたい。"></textarea>
+      <textarea id="user-reflection" placeholder="例: 英語長文の解釈で引っかかり時間がかかった。日本史との比率調整についてもアドバイスがほしい。"></textarea>
 
       <button type="button" class="primary-btn" id="ai-btn" onclick="requestAiAnalysis()">AIパートナーの多角分析を依頼する</button>
 
       <h3 style="font-size:0.95rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">AIレポート出力結果</h3>
       <div id="ai-report-output" class="report-output">
-AIキーを設定し、相談内容を入力してボタンを押すと、記録された学習データと科目の偏りを踏まえた個別アドバイスが生成されます。
+AIキーを設定し、相談内容を入力してボタンを押すと、記録された学習データと各分野の比率を踏まえた個別アドバイスが生成されます。
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // --- 状態管理データ（ゼロからスタート） ---
   let studyLogs = [];
-  let barChart, pieChart;
+  let barChart, pieChartMain, pieChartEnglish, pieChartJapanese;
 
-  // --- タブ切替 ---
   function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -370,7 +433,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     }
   }
 
-  // --- 科目・サブカテゴリ連動 ---
+  // 科目・細分化（英語：単語・文法・解釈・長文 / 国語：現代文・古文・漢文）
   function updateSubSubjectOptions() {
     const subject = document.getElementById('task-subject').value;
     const subSelect = document.getElementById('task-sub-subject');
@@ -378,11 +441,11 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
 
     let options = [];
     if (subject === '英語') {
-      options = ['英語全体', '長文読解', '文法・語法', '単語・熟語', '英作文'];
+      options = ['単語', '文法', '解釈', '長文'];
     } else if (subject === '国語') {
-      options = ['国語全体', '現代文', '古文', '漢文'];
+      options = ['現代文', '古文', '漢文'];
     } else if (subject === '日本史') {
-      options = ['日本史全体', '通史・時代背景', '文化史', '史料問題'];
+      options = ['通史', '文化史', '史料', '一問一答'];
     } else {
       options = ['その他'];
     }
@@ -395,7 +458,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     });
   }
 
-  // --- 学習ログの追加 ---
   function addStudyLog() {
     const subject = document.getElementById('task-subject').value;
     const subSubject = document.getElementById('task-sub-subject').value;
@@ -408,7 +470,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     const today = new Date();
     const dateStr = `${today.getMonth()+1}/${today.getDate()}`;
 
-    const newLog = {
+    studyLogs.push({
       id: Date.now(),
       date: dateStr,
       subject,
@@ -416,19 +478,21 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
       name,
       amount,
       unit
-    };
+    });
 
-    studyLogs.push(newLog);
     renderLogList();
+    updateGoalProgress();
     alert('学習ログを登録しました！');
   }
 
-  // --- ログの削除・レンダリング ---
   function deleteLog(id) {
     studyLogs = studyLogs.filter(log => log.id !== id);
     renderLogList();
-    updateCharts();
-    analyzeSubjectBalance();
+    updateGoalProgress();
+    if (document.getElementById('partner-page').classList.contains('active')) {
+      updateCharts();
+      analyzeSubjectBalance();
+    }
   }
 
   function renderLogList() {
@@ -460,122 +524,178 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     });
   }
 
-  // --- Chart.js グラフ更新（アニメーション＆各科目指定色） ---
+  // 横向き進捗バー更新（目標達成でチェックマーク表示）
+  function updateGoalProgress() {
+    const goalMax = parseFloat(document.getElementById('daily-goal-input').value) || 100;
+    
+    // 今日の日付ログのみ集計
+    const today = new Date();
+    const dateStr = `${today.getMonth()+1}/${today.getDate()}`;
+    const todayTotal = studyLogs
+      .filter(log => log.date === dateStr)
+      .reduce((sum, log) => sum + log.amount, 0);
+
+    document.getElementById('goal-current-val').innerText = todayTotal;
+    document.getElementById('goal-max-val').innerText = goalMax;
+
+    const percentage = Math.min(Math.round((todayTotal / goalMax) * 100), 100);
+    document.getElementById('goal-percentage').innerText = `${percentage}%`;
+
+    const fillBar = document.getElementById('goal-bar-fill');
+    fillBar.style.width = `${percentage}%`;
+
+    const checkMark = document.getElementById('goal-check');
+    if (todayTotal >= goalMax && goalMax > 0) {
+      checkMark.classList.add('active');
+      fillBar.style.backgroundColor = '#27ae60'; // 達成時緑
+    } else {
+      checkMark.classList.remove('active');
+      fillBar.style.backgroundColor = 'var(--primary)';
+    }
+  }
+
+  // Chart.js グラフ（科目色分け積み上げバー＆分野別円グラフ）
   function initCharts() {
-    // 棒グラフ
+    // 積み上げ棒グラフ（英語:ピンク / 国語:オレンジ / 日本史:緑）
     const ctxBar = document.getElementById('barChart').getContext('2d');
     barChart = new Chart(ctxBar, {
       type: 'bar',
       data: {
         labels: [],
-        datasets: [{
-          label: '日々の累計進捗量',
-          data: [],
-          backgroundColor: '#3b604e',
-          borderRadius: 6
-        }]
+        datasets: [
+          { label: '英語', data: [], backgroundColor: '#f4c2c2' },
+          { label: '国語', data: [], backgroundColor: '#f8cb9c' },
+          { label: '日本史', data: [], backgroundColor: '#b5dba4' },
+          { label: 'その他', data: [], backgroundColor: '#d1d8e0' }
+        ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: {
-          duration: 1200,
-          easing: 'easeOutQuart'
-        },
+        animation: { duration: 1000 },
         scales: {
-          y: { beginAtZero: true, grid: { color: '#dbe5dd' } },
-          x: { grid: { display: false } }
+          x: { stacked: true, grid: { display: false } },
+          y: { stacked: true, beginAtZero: true, grid: { color: '#dbe5dd' } }
         }
       }
     });
 
-    // 円グラフ（科目比率）
-    const ctxPie = document.getElementById('pieChart').getContext('2d');
-    pieChart = new Chart(ctxPie, {
+    // 円グラフ：全体
+    const ctxMain = document.getElementById('pieChartMain').getContext('2d');
+    pieChartMain = new Chart(ctxMain, {
       type: 'doughnut',
       data: {
         labels: ['英語', '国語', '日本史', 'その他'],
-        datasets: [{
-          data: [0, 0, 0, 0],
-          backgroundColor: ['#f4c2c2', '#f8cb9c', '#b5dba4', '#d1d8e0']
-        }]
+        datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#f4c2c2', '#f8cb9c', '#b5dba4', '#d1d8e0'] }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          animateScale: true,
-          animateRotate: true,
-          duration: 1000
-        }
-      }
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 円グラフ：英語内訳
+    const ctxEng = document.getElementById('pieChartEnglish').getContext('2d');
+    pieChartEnglish = new Chart(ctxEng, {
+      type: 'doughnut',
+      data: {
+        labels: ['単語', '文法', '解釈', '長文'],
+        datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#f8d7da', '#f1aeb5', '#ea868f', '#e35d6a'] }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 円グラフ：国語内訳
+    const ctxJpn = document.getElementById('pieChartJapanese').getContext('2d');
+    pieChartJapanese = new Chart(ctxJpn, {
+      type: 'doughnut',
+      data: {
+        labels: ['現代文', '古文', '漢文'],
+        datasets: [{ data: [0, 0, 0], backgroundColor: ['#ffe5d9', '#fcd5ce', '#f8edeb'] }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
     });
   }
 
   function updateCharts() {
-    // 日付別集計
-    const dateMap = {};
-    const subjectMap = { '英語': 0, '国語': 0, '日本史': 0, 'その他': 0 };
+    const dates = [...new Set(studyLogs.map(l => l.date))];
+    
+    // 積み上げデータ作成
+    const engData = [], jpnData = [], hisData = [], othData = [];
 
-    studyLogs.forEach(log => {
-      dateMap[log.date] = (dateMap[log.date] || 0) + log.amount;
-      if (subjectMap[log.subject] !== undefined) {
-        subjectMap[log.subject] += log.amount;
-      } else {
-        subjectMap['その他'] += log.amount;
-      }
+    dates.forEach(d => {
+      const logs = studyLogs.filter(l => l.date === d);
+      engData.push(logs.filter(l => l.subject === '英語').reduce((s, l) => s + l.amount, 0));
+      jpnData.push(logs.filter(l => l.subject === '国語').reduce((s, l) => s + l.amount, 0));
+      hisData.push(logs.filter(l => l.subject === '日本史').reduce((s, l) => s + l.amount, 0));
+      othData.push(logs.filter(l => l.subject === 'その他').reduce((s, l) => s + l.amount, 0));
     });
 
-    // 棒グラフ更新
-    barChart.data.labels = Object.keys(dateMap);
-    barChart.data.datasets[0].data = Object.values(dateMap);
+    barChart.data.labels = dates;
+    barChart.data.datasets[0].data = engData;
+    barChart.data.datasets[1].data = jpnData;
+    barChart.data.datasets[2].data = hisData;
+    barChart.data.datasets[3].data = othData;
     barChart.update();
 
-    // 円グラフ更新
-    pieChart.data.datasets[0].data = [
-      subjectMap['英語'],
-      subjectMap['国語'],
-      subjectMap['日本史'],
-      subjectMap['その他']
+    // 全体円グラフ
+    const mainTot = {
+      eng: studyLogs.filter(l => l.subject === '英語').reduce((s, l) => s + l.amount, 0),
+      jpn: studyLogs.filter(l => l.subject === '国語').reduce((s, l) => s + l.amount, 0),
+      his: studyLogs.filter(l => l.subject === '日本史').reduce((s, l) => s + l.amount, 0),
+      oth: studyLogs.filter(l => l.subject === 'その他').reduce((s, l) => s + l.amount, 0)
+    };
+    pieChartMain.data.datasets[0].data = [mainTot.eng, mainTot.jpn, mainTot.his, mainTot.oth];
+    pieChartMain.update();
+
+    // 英語円グラフ（単語, 文法, 解釈, 長文）
+    const engLogs = studyLogs.filter(l => l.subject === '英語');
+    pieChartEnglish.data.datasets[0].data = [
+      engLogs.filter(l => l.subSubject === '単語').reduce((s, l) => s + l.amount, 0),
+      engLogs.filter(l => l.subSubject === '文法').reduce((s, l) => s + l.amount, 0),
+      engLogs.filter(l => l.subSubject === '解釈').reduce((s, l) => s + l.amount, 0),
+      engLogs.filter(l => l.subSubject === '長文').reduce((s, l) => s + l.amount, 0)
     ];
-    pieChart.update();
+    pieChartEnglish.update();
+
+    // 国語円グラフ（現代文, 古文, 漢文）
+    const jpnLogs = studyLogs.filter(l => l.subject === '国語');
+    pieChartJapanese.data.datasets[0].data = [
+      jpnLogs.filter(l => l.subSubject === '現代文').reduce((s, l) => s + l.amount, 0),
+      jpnLogs.filter(l => l.subSubject === '古文').reduce((s, l) => s + l.amount, 0),
+      jpnLogs.filter(l => l.subSubject === '漢文').reduce((s, l) => s + l.amount, 0)
+    ];
+    pieChartJapanese.update();
   }
 
-  // --- 科目バランス自動分析（ワンポイント表示） ---
   function analyzeSubjectBalance() {
     const adviceEl = document.getElementById('ai-pie-advice');
-    const subjectMap = { '英語': 0, '国語': 0, '日本史': 0 };
-    let total = 0;
-
-    studyLogs.forEach(log => {
-      if (subjectMap[log.subject] !== undefined) {
-        subjectMap[log.subject] += log.amount;
-        total += log.amount;
-      }
-    });
+    let total = studyLogs.reduce((s, l) => s + l.amount, 0);
 
     if (total === 0) {
       adviceEl.innerText = "データが蓄積されると、ここにAIからの自動バランスアドバイスが表示されます。";
       return;
     }
 
-    const engRatio = ((subjectMap['英語'] / total) * 100).toFixed(0);
-    const jpnRatio = ((subjectMap['国語'] / total) * 100).toFixed(0);
-    const hisRatio = ((subjectMap['日本史'] / total) * 100).toFixed(0);
+    const eng = studyLogs.filter(l => l.subject === '英語').reduce((s, l) => s + l.amount, 0);
+    const jpn = studyLogs.filter(l => l.subject === '国語').reduce((s, l) => s + l.amount, 0);
+    
+    let advice = `【全体・分野の偏りチェック】\n`;
 
-    let advice = `【現在の学習比率】英語:${engRatio}% / 国語:${jpnRatio}% / 日本史:${hisRatio}%\n`;
-    if (engRatio < 40) {
-      advice += "💡 配点の高い『英語』の比率が低めです。配点比率に合わせたバランスを検討しましょう。";
-    } else if (hisRatio < 20) {
-      advice += "💡 『日本史』の積み上げがやや遅れています。知識整理のタスクを定期的に挟むと効果的です。";
+    // 英語の分野チェック
+    const engLong = studyLogs.filter(l => l.subject === '英語' && l.subSubject === '長文').reduce((s, l) => s + l.amount, 0);
+    if (eng > 0 && (engLong / eng) < 0.3) {
+      advice += "💡 英語は単語・解釈だけでなく『長文』の演習比率をもう少し増やすと早稲田実戦力に繋がります。\n";
+    }
+
+    // 国語の分野チェック
+    const jpnAncient = studyLogs.filter(l => l.subject === '国語' && l.subSubject === '古文').reduce((s, l) => s + l.amount, 0);
+    if (jpn > 0 && jpnAncient === 0) {
+      advice += "💡 国語で『古文』の記録がまだありません。古文単語・文法の基盤を早めに固めましょう。";
     } else {
-      advice += "✨ 非常に良好な科目バランスで学習が進んでいます！この調子で継続しましょう。";
+      advice += "✨ 各科目の分解データが綺麗に蓄積されています。そのまま弱点補強を続けましょう！";
     }
 
     adviceEl.innerText = advice;
   }
 
-  // --- Gemini API 接続 & 深層アドバイス要請 ---
   async function requestAiAnalysis() {
     const apiKey = document.getElementById('api-key').value.trim();
     const reportBox = document.getElementById('ai-report-output');
@@ -583,32 +703,29 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     const btn = document.getElementById('ai-btn');
 
     if (!apiKey) return alert("Google Gemini API Key を入力してください。");
-    if (studyLogs.length === 0 && !reflection) {
-      return alert("学習ログを記録するか、振り返り内容を入力してください。");
-    }
 
     btn.disabled = true;
     btn.innerText = "Geminiが多角的に分析中...";
-    reportBox.innerText = "これまでの学習ログとバランスを照合し、早稲田合格に必要な指導文を構築中...";
+    reportBox.innerText = "学習ログの内訳と振り返りを照合中...";
 
     const logSummary = studyLogs.map(l => `- ${l.date}: ${l.subject}(${l.subSubject}) ${l.name} ${l.amount}${l.unit}`).join('\n');
 
     const systemInstruction = `
 あなたは早稲田大学受験に特化した専属のエリートAIパートナーです。
-受験生に対して、慰めではなく「思考の深さ」「自分にない多角的な視点」「出題者側のトラップ構造」を提示してください。
+英語（単語・文法・解釈・長文）や国語（現代文・古文・漢文）の細分化された学習バランスに言及しながらアドバイスしてください。
 
 【出力構成】
-1. 思考プロセスの弱点分析（なぜそのミスや伸び悩みが起きるのか）
-2. エリートパートナーからの多面的アプローチ（自分では気づかない逆説的・俯瞰的な視点）
+1. 思考プロセスの弱点分析
+2. エリートパートナーからの多面的アプローチ
 3. 明日からの具体的改善タスク方針
     `;
 
     const userPrompt = `
-【現在の学習ログ一覧】
-${logSummary || "（まだログなし）"}
+【学習ログ一覧】
+${logSummary || "（ログなし）"}
 
-【受験生本人の相談・振返り】
-${reflection || "特に記載なし。ログ全体の傾向からアドバイスをお願いします。"}
+【相談・振り返り】
+${reflection || "特になし。"}
     `;
 
     try {
@@ -624,21 +741,21 @@ ${reflection || "特に記載なし。ログ全体の傾向からアドバイス
       if (data.candidates && data.candidates[0].content.parts[0].text) {
         reportBox.innerText = data.candidates[0].content.parts[0].text;
       } else {
-        reportBox.innerText = "エラー: AIからのレスポンスを取得できませんでした。APIキーを確認してください。";
+        reportBox.innerText = "エラー: AIからのレスポンスを取得できませんでした。";
       }
     } catch (err) {
       console.error(err);
-      reportBox.innerText = "通信エラーが発生しました。ネット環境またはAPIキーを確認してください。";
+      reportBox.innerText = "通信エラーが発生しました。";
     } finally {
       btn.disabled = false;
       btn.innerText = "AIパートナーの多角分析を依頼する";
     }
   }
 
-  // 初期化実行
   window.onload = function() {
     updateSubSubjectOptions();
     initCharts();
+    updateGoalProgress();
   };
 </script>
 
