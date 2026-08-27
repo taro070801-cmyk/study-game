@@ -3,42 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>早稲田攻略 AIパートナー & 学習ログ</title>
+  <title>早稲田攻略 戦略ナビゲーター</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg-base: #eef2ed;
-      --card-bg: #f7f9f6;
+      /* アースカラー & 自然（山・川・草原・大海）のテーマ */
+      --bg-gradient: linear-gradient(135deg, #e4efe7 0%, #ceddcc 35%, #b3cdd1 70%, #9cb8c4 100%);
+      --card-bg: rgba(247, 249, 246, 0.92);
       --text-main: #2d3732;
       --text-sub: #52635a;
       --primary: #3b604e;
-      --accent-ocean: #4a7c59;
-      --border-color: #d1dad3;
+      --border-color: #c4d1c7;
+      
+      /* 科目専用の優しい色合い */
+      --subject-english: #f4c2c2;   /* 英語：柔らかいピンク */
+      --subject-japanese: #f8cb9c;  /* 国語：柔らかいオレンジ */
+      --subject-history: #b5dba4;   /* 日本史：柔らかい緑 */
+      --subject-other: #d1d8e0;     /* その他 */
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-base);
+      background: var(--bg-gradient);
+      background-attachment: fixed;
       color: var(--text-main);
       padding: 20px;
       line-height: 1.6;
+      min-height: 100vh;
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
     }
 
+    /* ヘッダー＆API設定 */
     header {
       background: var(--card-bg);
       padding: 20px;
       border-radius: 12px;
       border: 1px solid var(--border-color);
+      margin-bottom: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -46,40 +53,59 @@
       gap: 10px;
     }
 
-    header h1 { font-size: 1.4rem; color: var(--primary); }
-
-    .status-badge {
-      background: #e2ebd9;
-      color: var(--primary);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      font-weight: bold;
-    }
+    header h1 { font-size: 1.3rem; color: var(--primary); }
 
     .api-key-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      background: #e2ebd9;
-      border-radius: 8px;
+      margin-top: 5px;
     }
 
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
+    .api-key-box input {
+      flex: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 0.85rem;
     }
 
-    @media (max-width: 850px) {
-      .main-grid { grid-template-columns: 1fr; }
+    /* タブ切り替え（タスク管理 vs AIパートナー） */
+    .tab-menu {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
     }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     .card {
       background: var(--card-bg);
       border-radius: 12px;
       padding: 20px;
       border: 1px solid var(--border-color);
+      margin-bottom: 20px;
     }
 
     .card h2 {
@@ -90,6 +116,7 @@
       border-bottom: 2px solid var(--border-color);
     }
 
+    /* フォーム・入力パーツ */
     label {
       display: block;
       font-size: 0.85rem;
@@ -109,9 +136,13 @@
       font-size: 0.95rem;
     }
 
-    textarea { resize: vertical; height: 100px; }
+    .inline-inputs {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 10px;
+    }
 
-    button {
+    button.primary-btn {
       margin-top: 15px;
       width: 100%;
       padding: 12px;
@@ -125,214 +156,490 @@
       transition: background 0.2s;
     }
 
-    button:hover { background-color: var(--accent-ocean); }
-    button:disabled { background-color: #a0b2a6; cursor: not-allowed; }
+    button.primary-btn:hover { opacity: 0.9; }
 
-    .chart-container { position: relative; height: 260px; width: 100%; }
+    /* タスクリスト表示 */
+    .task-list {
+      list-style: none;
+      margin-top: 10px;
+    }
 
+    .task-item {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .task-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .bg-english { background-color: var(--subject-english); }
+    .bg-japanese { background-color: var(--subject-japanese); }
+    .bg-history { background-color: var(--subject-history); }
+    .bg-other { background-color: var(--subject-other); }
+
+    .delete-btn {
+      background: #e2b3b3;
+      color: #5c2222;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* グラフグリッド */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-container {
+      position: relative;
+      height: 250px;
+      width: 100%;
+    }
+
+    /* AIレポート表示領域 */
     .report-output {
-      margin-top: 15px;
       background: #ffffff;
       border-left: 4px solid var(--primary);
       padding: 15px;
       border-radius: 0 8px 8px 0;
       white-space: pre-wrap;
       font-size: 0.95rem;
-      color: var(--text-main);
       line-height: 1.7;
       min-height: 150px;
-      max-height: 500px;
-      overflow-y: auto;
+    }
+
+    .ai-advice-box {
+      background: #eaf2ed;
+      border: 1px solid #b8d4c2;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: var(--primary);
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
+  <!-- ヘッダー -->
   <header>
     <div>
-      <h1>早稲田合格戦略ダッシュボード (Gemini AI連携版)</h1>
-      <p style="font-size: 0.85rem; color: var(--text-sub);">自然派アースカラーデザイン / リアルタイムGemini API接続</p>
+      <h1>早稲田攻略 戦略ナビゲーター</h1>
+      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / タスク自由単位・学習比率自動分析</p>
     </div>
-    <div class="status-badge" id="user-status">
-      累計ポイント: 12,400 XP | 現在の標高: 1,240m
-    </div>
-    
-    <!-- APIキー入力エリア -->
     <div class="api-key-box">
-      <label for="api-key" style="margin:0;">Google Gemini API Key を入力:</label>
-      <input type="password" id="api-key" placeholder="AIzaSy..." style="margin-top:4px;">
+      <label for="api-key" style="margin:0; font-size:0.8rem;">Gemini API Key:</label>
+      <input type="password" id="api-key" placeholder="AIzaSy...">
     </div>
   </header>
 
-  <div class="main-grid">
-    <!-- 学習入力 & AIトレーナー連携 -->
+  <!-- ページ切替タブ -->
+  <div class="tab-menu">
+    <button class="tab-btn active" onclick="switchTab('task-page')">1. タスク管理 & 日々の記録</button>
+    <button class="tab-btn" onclick="switchTab('partner-page')">2. 専属AIパートナー & 分析</button>
+  </div>
+
+  <!-- PAGE 1: タスク管理 & 記録 -->
+  <div id="task-page" class="tab-content active">
     <div class="card">
-      <h2>1. 今日の勉強ログ & 悩み・問いかけ</h2>
-      <form id="study-form">
-        <label for="subject">科目・対象</label>
-        <select id="subject">
-          <option value="英語（長文読解・文脈把握）">英語（長文読解・文脈把握）</option>
-          <option value="英語（英作文・文法・語法）">英語（英作文・文法・語法）</option>
-          <option value="日本史（時代背景・論理展開）">日本史（時代背景・論理展開）</option>
-          <option value="国語（現代文・論理的読解）">国語（現代文・論理的読解）</option>
-          <option value="国語（古文・漢文）">国語（古文・漢文）</option>
+      <h2>新規学習タスクの登録 / 学習ログ追加</h2>
+      <form id="task-form">
+        <label for="task-subject">科目</label>
+        <select id="task-subject" onchange="updateSubSubjectOptions()">
+          <option value="英語">英語</option>
+          <option value="国語">国語</option>
+          <option value="日本史">日本史</option>
+          <option value="その他">その他</option>
         </select>
 
-        <label for="study-time">学習時間（分）</label>
-        <input type="number" id="study-time" value="90" min="10" step="10">
+        <label for="task-sub-subject">細分化（任意）</label>
+        <select id="task-sub-subject">
+          <option value="英語全体">英語全体</option>
+          <option value="長文読解">長文読解</option>
+          <option value="文法・単語">文法・単語</option>
+        </select>
 
-        <label for="user-reflection">相談・振返り・疑問（自由に入力）</label>
-        <textarea id="user-reflection" placeholder="例: 早稲田の英語でパラグラフごとの論理転換を見落として失点した。単なる和訳にとどまらない対策や、自分が見落としている視点を教えてほしい。"></textarea>
+        <div class="inline-inputs" style="margin-top:10px;">
+          <div>
+            <label for="task-name">教材・タスク名</label>
+            <input type="text" id="task-name" placeholder="例: システム英単語">
+          </div>
+          <div>
+            <label for="task-amount">進めた量</label>
+            <input type="number" id="task-amount" value="50" min="1">
+          </div>
+          <div>
+            <label for="task-unit">単位（自由入力）</label>
+            <input type="text" id="task-unit" placeholder="例: 単語, p, 題">
+          </div>
+        </div>
 
-        <button type="button" id="submit-btn" onclick="processAnalysisWithGemini()">Geminiパートナーにリアルタイム分析を依頼</button>
+        <button type="button" class="primary-btn" onclick="addStudyLog()">学習実績を記録する</button>
       </form>
     </div>
 
-    <!-- 累積ポイントグラフ -->
+    <!-- 登録済み記録一覧 -->
     <div class="card">
-      <h2>2. 継続の積み上げ（累積XP成長グラフ）</h2>
-      <div class="chart-container">
-        <canvas id="growthChart"></canvas>
-      </div>
+      <h2>学習ログ・編集一覧</h2>
+      <ul id="log-list" class="task-list">
+        <!-- JSで動的追加（初期はゼロ） -->
+      </ul>
     </div>
   </div>
 
-  <!-- Geminiからの動的リアルタイム回答 -->
-  <div class="card">
-    <h2>3. 専属AIパートナーからのリアルタイム分析レポート</h2>
-    <div id="report-container" class="report-output">
-APIキーを入力し、メッセージを入力してボタンを押すと、Geminiがリアルタイムであなた専用のアドバイスと深層分析を生成します。
+  <!-- PAGE 2: AIパートナー & 分析（グラフ） -->
+  <div id="partner-page" class="tab-content">
+    <div class="charts-grid">
+      <!-- 棒グラフ：日々の推移（増減表示） -->
+      <div class="card">
+        <h2>日々の進捗推移（累積棒グラフ）</h2>
+        <div class="chart-container">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 円グラフ：科目の偏り -->
+      <div class="card">
+        <h2>科目の学習割合</h2>
+        <div class="chart-container">
+          <canvas id="pieChart"></canvas>
+        </div>
+        <div id="ai-pie-advice" class="ai-advice-box">
+          データが蓄積されると、ここにAIからの自動バランスアドバイスが表示されます。
+        </div>
+      </div>
+    </div>
+
+    <!-- AIパートナー対話＆深層分析 -->
+    <div class="card">
+      <h2>早稲田専門エリートAIパートナーによる個別分析</h2>
+      <label for="user-reflection">本日の振り返り・相談・つまずき（自由記述）</label>
+      <textarea id="user-reflection" placeholder="例: 日本史の文化史で知識が混同してしまう。選択肢の罠を見抜くコツを知りたい。"></textarea>
+
+      <button type="button" class="primary-btn" id="ai-btn" onclick="requestAiAnalysis()">AIパートナーの多角分析を依頼する</button>
+
+      <h3 style="font-size:0.95rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">AIレポート出力結果</h3>
+      <div id="ai-report-output" class="report-output">
+AIキーを設定し、相談内容を入力してボタンを押すと、記録された学習データと科目の偏りを踏まえた個別アドバイスが生成されます。
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-  // 初期データ（成長グラフ）
-  const labels = ['8/21', '8/22', '8/23', '8/24', '8/25', '8/26', '今日'];
-  const xpData = [10500, 10900, 11200, 11500, 11900, 12400];
+  // --- 状態管理データ（ゼロからスタート） ---
+  let studyLogs = [];
+  let barChart, pieChart;
 
-  const ctx = document.getElementById('growthChart').getContext('2d');
-  const growthChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels.slice(0, 6),
-      datasets: [{
-        label: '累計獲得ポイント (XP)',
-        data: xpData,
-        borderColor: '#3b604e',
-        backgroundColor: 'rgba(59, 96, 78, 0.1)',
-        fill: true,
-        tension: 0.3,
-        pointBackgroundColor: '#2c5282',
-        pointRadius: 5
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: false, grid: { color: '#e0e6e1' }, ticks: { color: '#52635a' } },
-        x: { grid: { display: false }, ticks: { color: '#52635a' } }
+  // --- タブ切替 ---
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+
+    if (tabId === 'partner-page') {
+      updateCharts();
+      analyzeSubjectBalance();
+    }
+  }
+
+  // --- 科目・サブカテゴリ連動 ---
+  function updateSubSubjectOptions() {
+    const subject = document.getElementById('task-subject').value;
+    const subSelect = document.getElementById('task-sub-subject');
+    subSelect.innerHTML = '';
+
+    let options = [];
+    if (subject === '英語') {
+      options = ['英語全体', '長文読解', '文法・語法', '単語・熟語', '英作文'];
+    } else if (subject === '国語') {
+      options = ['国語全体', '現代文', '古文', '漢文'];
+    } else if (subject === '日本史') {
+      options = ['日本史全体', '通史・時代背景', '文化史', '史料問題'];
+    } else {
+      options = ['その他'];
+    }
+
+    options.forEach(opt => {
+      const el = document.createElement('option');
+      el.value = opt;
+      el.innerText = opt;
+      subSelect.appendChild(el);
+    });
+  }
+
+  // --- 学習ログの追加 ---
+  function addStudyLog() {
+    const subject = document.getElementById('task-subject').value;
+    const subSubject = document.getElementById('task-sub-subject').value;
+    const name = document.getElementById('task-name').value || '学習';
+    const amount = parseFloat(document.getElementById('task-amount').value) || 0;
+    const unit = document.getElementById('task-unit').value || '項';
+
+    if (amount <= 0) return alert('正しい量を入力してください。');
+
+    const today = new Date();
+    const dateStr = `${today.getMonth()+1}/${today.getDate()}`;
+
+    const newLog = {
+      id: Date.now(),
+      date: dateStr,
+      subject,
+      subSubject,
+      name,
+      amount,
+      unit
+    };
+
+    studyLogs.push(newLog);
+    renderLogList();
+    alert('学習ログを登録しました！');
+  }
+
+  // --- ログの削除・レンダリング ---
+  function deleteLog(id) {
+    studyLogs = studyLogs.filter(log => log.id !== id);
+    renderLogList();
+    updateCharts();
+    analyzeSubjectBalance();
+  }
+
+  function renderLogList() {
+    const listEl = document.getElementById('log-list');
+    listEl.innerHTML = '';
+
+    if (studyLogs.length === 0) {
+      listEl.innerHTML = '<li style="text-align:center; color:var(--text-sub); padding:15px;">ログはまだありません（ゼロからスタート）</li>';
+      return;
+    }
+
+    studyLogs.forEach(log => {
+      let badgeClass = 'bg-other';
+      if (log.subject === '英語') badgeClass = 'bg-english';
+      if (log.subject === '国語') badgeClass = 'bg-japanese';
+      if (log.subject === '日本史') badgeClass = 'bg-history';
+
+      const li = document.createElement('li');
+      li.className = 'task-item';
+      li.innerHTML = `
+        <div class="task-info">
+          <span class="badge ${badgeClass}">${log.subject} (${log.subSubject})</span>
+          <strong>${log.name}</strong>
+          <span>${log.amount} ${log.unit} (${log.date})</span>
+        </div>
+        <button class="delete-btn" onclick="deleteLog(${log.id})">削除</button>
+      `;
+      listEl.appendChild(li);
+    });
+  }
+
+  // --- Chart.js グラフ更新（アニメーション＆各科目指定色） ---
+  function initCharts() {
+    // 棒グラフ
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    barChart = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: '日々の累計進捗量',
+          data: [],
+          backgroundColor: '#3b604e',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 1200,
+          easing: 'easeOutQuart'
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#dbe5dd' } },
+          x: { grid: { display: false } }
+        }
       }
-    }
-  });
+    });
 
-  // Gemini APIに直接リクエストを送信する関数
-  async function processAnalysisWithGemini() {
+    // 円グラフ（科目比率）
+    const ctxPie = document.getElementById('pieChart').getContext('2d');
+    pieChart = new Chart(ctxPie, {
+      type: 'doughnut',
+      data: {
+        labels: ['英語', '国語', '日本史', 'その他'],
+        datasets: [{
+          data: [0, 0, 0, 0],
+          backgroundColor: ['#f4c2c2', '#f8cb9c', '#b5dba4', '#d1d8e0']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          animateScale: true,
+          animateRotate: true,
+          duration: 1000
+        }
+      }
+    });
+  }
+
+  function updateCharts() {
+    // 日付別集計
+    const dateMap = {};
+    const subjectMap = { '英語': 0, '国語': 0, '日本史': 0, 'その他': 0 };
+
+    studyLogs.forEach(log => {
+      dateMap[log.date] = (dateMap[log.date] || 0) + log.amount;
+      if (subjectMap[log.subject] !== undefined) {
+        subjectMap[log.subject] += log.amount;
+      } else {
+        subjectMap['その他'] += log.amount;
+      }
+    });
+
+    // 棒グラフ更新
+    barChart.data.labels = Object.keys(dateMap);
+    barChart.data.datasets[0].data = Object.values(dateMap);
+    barChart.update();
+
+    // 円グラフ更新
+    pieChart.data.datasets[0].data = [
+      subjectMap['英語'],
+      subjectMap['国語'],
+      subjectMap['日本史'],
+      subjectMap['その他']
+    ];
+    pieChart.update();
+  }
+
+  // --- 科目バランス自動分析（ワンポイント表示） ---
+  function analyzeSubjectBalance() {
+    const adviceEl = document.getElementById('ai-pie-advice');
+    const subjectMap = { '英語': 0, '国語': 0, '日本史': 0 };
+    let total = 0;
+
+    studyLogs.forEach(log => {
+      if (subjectMap[log.subject] !== undefined) {
+        subjectMap[log.subject] += log.amount;
+        total += log.amount;
+      }
+    });
+
+    if (total === 0) {
+      adviceEl.innerText = "データが蓄積されると、ここにAIからの自動バランスアドバイスが表示されます。";
+      return;
+    }
+
+    const engRatio = ((subjectMap['英語'] / total) * 100).toFixed(0);
+    const jpnRatio = ((subjectMap['国語'] / total) * 100).toFixed(0);
+    const hisRatio = ((subjectMap['日本史'] / total) * 100).toFixed(0);
+
+    let advice = `【現在の学習比率】英語:${engRatio}% / 国語:${jpnRatio}% / 日本史:${hisRatio}%\n`;
+    if (engRatio < 40) {
+      advice += "💡 配点の高い『英語』の比率が低めです。配点比率に合わせたバランスを検討しましょう。";
+    } else if (hisRatio < 20) {
+      advice += "💡 『日本史』の積み上げがやや遅れています。知識整理のタスクを定期的に挟むと効果的です。";
+    } else {
+      advice += "✨ 非常に良好な科目バランスで学習が進んでいます！この調子で継続しましょう。";
+    }
+
+    adviceEl.innerText = advice;
+  }
+
+  // --- Gemini API 接続 & 深層アドバイス要請 ---
+  async function requestAiAnalysis() {
     const apiKey = document.getElementById('api-key').value.trim();
-    const reportBox = document.getElementById('report-container');
-    const submitBtn = document.getElementById('submit-btn');
-
-    if (!apiKey) {
-      alert("Google Gemini API Key を入力してください。");
-      return;
-    }
-
-    const subject = document.getElementById('subject').value;
-    const minutes = parseInt(document.getElementById('study-time').value) || 0;
+    const reportBox = document.getElementById('ai-report-output');
     const reflection = document.getElementById('user-reflection').value;
+    const btn = document.getElementById('ai-btn');
 
-    if (!reflection) {
-      alert("相談・振返り・疑問を入力してください。");
-      return;
+    if (!apiKey) return alert("Google Gemini API Key を入力してください。");
+    if (studyLogs.length === 0 && !reflection) {
+      return alert("学習ログを記録するか、振り返り内容を入力してください。");
     }
 
-    // UIをローディング状態に変更
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Geminiが思考・分析中...";
-    reportBox.innerText = "Geminiが早稲田の傾向と入力された内容を照合し、多角的な視点を構築しています...";
+    btn.disabled = true;
+    btn.innerText = "Geminiが多角的に分析中...";
+    reportBox.innerText = "これまでの学習ログとバランスを照合し、早稲田合格に必要な指導文を構築中...";
 
-    // システムプロンプト（AIに専属エリートトレーナーの役割を与える指令）
+    const logSummary = studyLogs.map(l => `- ${l.date}: ${l.subject}(${l.subSubject}) ${l.name} ${l.amount}${l.unit}`).join('\n');
+
     const systemInstruction = `
-あなたは早稲田大学受験に特化した、超優秀で厳しくも温かい専属のAIパートナー・トレーナーです。
-浪人生・受験生に対して、単なる慰めや表面的な壁打ちはせず、「受かるための思考の深さ」「受験生自身が気づいていない多角的な視点・盲点」「出題者の意図」を突くアドバイスを提供してください。
+あなたは早稲田大学受験に特化した専属のエリートAIパートナーです。
+受験生に対して、慰めではなく「思考の深さ」「自分にない多角的な視点」「出題者側のトラップ構造」を提示してください。
 
-【出力フォーマット】
-以下の構成で簡潔かつ明瞭に回答してください：
-■ 学習傾向 & 弱点の深層分析
-（表面的な失敗の理由ではなく、思考プロセスのどこで踏み外したかを指摘）
-
-■ エリートパートナーの多面的アプローチ（自分にない視点）
-（和訳依存からの脱却、出題者側のトラップ構造、逆説的思考など、受験生の視点を一段引き上げるアドバイス）
-
-■ 明日への具体的改善アクション
-（明日すぐに実践できる具体的な行動方針）
+【出力構成】
+1. 思考プロセスの弱点分析（なぜそのミスや伸び悩みが起きるのか）
+2. エリートパートナーからの多面的アプローチ（自分では気づかない逆説的・俯瞰的な視点）
+3. 明日からの具体的改善タスク方針
     `;
 
     const userPrompt = `
-【学習科目】: ${subject}
-【学習時間】: ${minutes}分
-【本人の振返り・悩み・疑問】:
-${reflection}
+【現在の学習ログ一覧】
+${logSummary || "（まだログなし）"}
+
+【受験生本人の相談・振返り】
+${reflection || "特に記載なし。ログ全体の傾向からアドバイスをお願いします。"}
     `;
 
     try {
-      // Gemini 2.5 Flash API呼び出し
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: systemInstruction + "\n\n" + userPrompt }
-            ]
-          }]
+          contents: [{ parts: [{ text: systemInstruction + "\n\n" + userPrompt }] }]
         })
       });
 
       const data = await response.json();
-
       if (data.candidates && data.candidates[0].content.parts[0].text) {
-        const aiResponse = data.candidates[0].content.parts[0].text;
-        
-        // ポイント加算とグラフの動的更新
-        const gainedXp = minutes * 2 + 100;
-        const currentXp = xpData[xpData.length - 1] + gainedXp;
-        growthChart.data.labels = labels;
-        growthChart.data.datasets[0].data.push(currentXp);
-        growthChart.update();
-
-        document.getElementById('user-status').innerText = 
-          `累計ポイント: ${currentXp.toLocaleString()} XP | 現在の標高: ${(currentXp / 10).toFixed(0)}m`;
-
-        // レポート表示
-        reportBox.innerText = `【獲得XP: +${gainedXp} pt】\n\n` + aiResponse;
+        reportBox.innerText = data.candidates[0].content.parts[0].text;
       } else {
-        reportBox.innerText = "エラー: APIからのレスポンスを解析できませんでした。APIキーを確認してください。";
+        reportBox.innerText = "エラー: AIからのレスポンスを取得できませんでした。APIキーを確認してください。";
       }
-
-    } catch (error) {
-      console.error(error);
-      reportBox.innerText = "通信エラーが発生しました。APIキーまたはネットワーク接続を確認してください。";
+    } catch (err) {
+      console.error(err);
+      reportBox.innerText = "通信エラーが発生しました。ネット環境またはAPIキーを確認してください。";
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Geminiパートナーにリアルタイム分析を依頼";
+      btn.disabled = false;
+      btn.innerText = "AIパートナーの多角分析を依頼する";
     }
   }
+
+  // 初期化実行
+  window.onload = function() {
+    updateSubSubjectOptions();
+    initCharts();
+  };
 </script>
 
 </body>
