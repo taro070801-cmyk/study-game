@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Task Tracker</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #6366f1;
+      --accent-active: #4f46e5;
+      --text: #f8fafc;
+      --subtext: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 24px 16px;
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .total-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--subtext);
+      letter-spacing: 0.1em;
+    }
+
+    .total-pt-container {
+      margin-top: 4px;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .total-pt {
+      font-size: 3.75rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      transition: transform 0.1s ease;
+    }
+
+    .total-unit {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .task-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .task-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .task-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .task-rule {
+      font-size: 0.75rem;
+      color: var(--subtext);
+    }
+
+    .task-count {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .add-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+      transition: all 0.1s ease;
+    }
+
+    .add-btn:active {
+      background: var(--accent-active);
+      transform: scale(0.95);
+    }
+
+    .logs-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .logs-header {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--subtext);
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .clear-btn {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .log-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .log-date {
+      color: var(--subtext);
+      font-size: 0.75rem;
+    }
+
+    .scale-up {
+      transform: scale(1.15);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="total-title">TOTAL ACCUMULATED</div>
+    <div class="total-pt-container">
+      <span class="total-pt" id="total-pt">0</span>
+      <span class="total-unit">pt</span>
+    </div>
+  </header>
+
+  <div class="task-list" id="task-list"></div>
+
+  <div class="logs-container">
+    <div class="logs-header">
+      <span>RECENT ACTIVITY</span>
+      <button class="clear-btn" id="clear-btn">リセット</button>
+    </div>
+    <ul class="log-list" id="log-list"></ul>
+  </div>
+</div>
+
+<script>
+  // 学習タスクの定義
+  const TASKS = [
+    { id: 'english', name: '英語長文', rule: '1題 完了', pt: 1 },
+    { id: 'modern', name: '現代文', rule: '1題 完了', pt: 1 },
+    { id: 'classic', name: '古文', rule: '1題 完了', pt: 1 },
+    { id: 'words', name: '単語・用語', rule: '50個 確認', pt: 1 },
+    { id: 'questions', name: '問題集・文法', rule: '10問 完了', pt: 1 }
+  ];
+
+  // ローカルストレージからのデータ取得
+  let state = JSON.parse(localStorage.getItem('study_tracker_data')) || {
+    totalPt: 0,
+    counts: { english: 0, modern: 0, classic: 0, words: 0, questions: 0 },
+    logs: []
+  };
+
+  function saveData() {
+    localStorage.setItem('study_tracker_data', JSON.stringify(state));
+  }
+
+  function render() {
+    // ポイント表示
+    const totalPtEl = document.getElementById('total-pt');
+    totalPtEl.textContent = state.totalPt;
+
+    // タスクカードの生成
+    const taskListEl = document.getElementById('task-list');
+    taskListEl.innerHTML = '';
+    
+    TASKS.forEach(task => {
+      const count = state.counts[task.id] || 0;
+      const card = document.createElement('div');
+      card.className = 'task-card';
+      card.innerHTML = `
+        <div class="task-info">
+          <div class="task-name">${task.name}</div>
+          <div class="task-rule">${task.rule}</div>
+          <div class="task-count">累計 ${count} 完了</div>
+        </div>
+        <button class="add-btn" onclick="addPt('${task.id}')">+${task.pt} pt</button>
+      `;
+      taskListEl.appendChild(card);
+    });
+
+    // 履歴表示（最新順）
+    const logListEl = document.getElementById('log-list');
+    logListEl.innerHTML = '';
+    state.logs.slice().reverse().forEach(log => {
+      const li = document.createElement('li');
+      li.className = 'log-item';
+      li.innerHTML = `
+        <span>${log.taskName} (+${log.pt}pt)</span>
+        <span class="log-date">${log.date}</span>
+      `;
+      logListEl.appendChild(li);
+    });
+  }
+
+  function addPt(taskId) {
+    const task = TASKS.find(t => t.id === taskId);
+    if (!task) return;
+
+    state.totalPt += task.pt;
+    state.counts[taskId] = (state.counts[taskId] || 0) + 1;
+
+    const now = new Date();
+    const dateStr = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    
+    state.logs.push({
+      taskName: task.name,
+      pt: task.pt,
+      date: dateStr
+    });
+
+    // アニメーション効果（即実利の演出）
+    const totalPtEl = document.getElementById('total-pt');
+    totalPtEl.classList.add('scale-up');
+    setTimeout(() => totalPtEl.classList.remove('scale-up'), 150);
+
+    saveData();
+    render();
+  }
+
+  document.getElementById('clear-btn').addEventListener('click', () => {
+    if (confirm('すべてのデータをリセットしますか？')) {
+      state = {
+        totalPt: 0,
+        counts: { english: 0, modern: 0, classic: 0, words: 0, questions: 0 },
+        logs: []
+      };
+      saveData();
+      render();
+    }
+  });
+
+  // 初期化
+  render();
+</script>
+
+</body>
+</html>
