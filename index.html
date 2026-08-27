@@ -7,7 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      /* アースカラー & 自然（山・川・草原・大海）のテーマ */
+      /* アースカラー & 自然のテーマ */
       --bg-gradient: linear-gradient(135deg, #e4efe7 0%, #ceddcc 35%, #b3cdd1 70%, #9cb8c4 100%);
       --card-bg: rgba(247, 249, 246, 0.92);
       --text-main: #2d3732;
@@ -15,11 +15,17 @@
       --primary: #3b604e;
       --border-color: #c4d1c7;
       
-      /* 科目専用の優しい色合い */
-      --subject-english: #f4c2c2;   /* 英語：ピンク */
-      --subject-japanese: #f8cb9c;  /* 国語：オレンジ */
-      --subject-history: #b5dba4;   /* 日本史：緑 */
-      --subject-other: #d1d8e0;     /* その他 */
+      /* 通常時のカラー */
+      --subject-english: #f4c2c2;
+      --subject-japanese: #f8cb9c;
+      --subject-history: #b5dba4;
+      --subject-other: #d1d8e0;
+
+      /* 達成時（100%到達時）の深い濃色 */
+      --subject-english-completed: #c95b6c;
+      --subject-japanese-completed: #d9822b;
+      --subject-history-completed: #4e8b3b;
+      --subject-other-completed: #6c7a89;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -139,6 +145,10 @@
       gap: 10px;
     }
 
+    @media (max-width: 600px) {
+      .inline-inputs { grid-template-columns: 1fr; }
+    }
+
     button.primary-btn {
       margin-top: 15px;
       width: 100%;
@@ -209,13 +219,20 @@
       height: 100%;
       width: 0%;
       border-radius: 10px;
-      transition: width 0.5s ease-in-out;
+      transition: width 0.5s ease-in-out, background-color 0.4s ease;
     }
 
+    /* 通常カラー定義 */
     .fill-english { background-color: var(--subject-english); }
     .fill-japanese { background-color: var(--subject-japanese); }
     .fill-history { background-color: var(--subject-history); }
     .fill-other { background-color: var(--subject-other); }
+
+    /* 達成（MAX）時の深い濃色定義 */
+    .fill-english.completed { background-color: var(--subject-english-completed); }
+    .fill-japanese.completed { background-color: var(--subject-japanese-completed); }
+    .fill-history.completed { background-color: var(--subject-history-completed); }
+    .fill-other.completed { background-color: var(--subject-other-completed); }
 
     .check-mark {
       color: #27ae60;
@@ -246,6 +263,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .badge {
@@ -314,11 +332,11 @@
   <header>
     <div>
       <h1>早稲田攻略 戦略ナビゲーター</h1>
-      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / 科目別目標管理 & 細長バー推移グラフ</p>
+      <p style="font-size: 0.8rem; color: var(--text-sub);">大自然テーマ / 登録済み教材選択 & 達成時深色ハイライト機能</p>
     </div>
     <div class="api-key-box">
       <label for="api-key" style="margin:0; font-size:0.8rem;">Gemini API Key:</label>
-      <input type="password" id="api-key" placeholder="AIzaSy...">
+      <input type="password" id="api-key" placeholder="AIzaSy..." onchange="saveData()">
     </div>
   </header>
 
@@ -329,7 +347,7 @@
 
   <!-- PAGE 1: タスク管理 & 記録 -->
   <div id="task-page" class="tab-content active">
-    <!-- 科目別の進捗目標バー（4科目） -->
+    <!-- 科目別の進捗目標バー -->
     <div class="card">
       <h2>本日の科目別目標達成度</h2>
       <div class="subject-goal-grid">
@@ -344,7 +362,7 @@
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
-            <input type="number" id="goal-english" value="50" onchange="updateGoalProgress()">
+            <input type="number" id="goal-english" value="50" onchange="updateGoalProgress(); saveData();">
           </div>
           <div class="progress-bar-bg">
             <div id="bar-english" class="progress-bar-fill fill-english"></div>
@@ -362,7 +380,7 @@
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
-            <input type="number" id="goal-japanese" value="30" onchange="updateGoalProgress()">
+            <input type="number" id="goal-japanese" value="30" onchange="updateGoalProgress(); saveData();">
           </div>
           <div class="progress-bar-bg">
             <div id="bar-japanese" class="progress-bar-fill fill-japanese"></div>
@@ -380,7 +398,7 @@
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
-            <input type="number" id="goal-history" value="40" onchange="updateGoalProgress()">
+            <input type="number" id="goal-history" value="40" onchange="updateGoalProgress(); saveData();">
           </div>
           <div class="progress-bar-bg">
             <div id="bar-history" class="progress-bar-fill fill-history"></div>
@@ -398,7 +416,7 @@
           </div>
           <div class="goal-input-inline">
             <label style="margin:0;">目標:</label>
-            <input type="number" id="goal-other" value="10" onchange="updateGoalProgress()">
+            <input type="number" id="goal-other" value="10" onchange="updateGoalProgress(); saveData();">
           </div>
           <div class="progress-bar-bg">
             <div id="bar-other" class="progress-bar-fill fill-other"></div>
@@ -407,11 +425,12 @@
       </div>
     </div>
 
+    <!-- 学習ログ追加フォーム -->
     <div class="card">
       <h2>新規学習タスクの登録 / 学習ログ追加</h2>
       <form id="task-form">
         <label for="task-subject">科目</label>
-        <select id="task-subject" onchange="updateSubSubjectOptions()">
+        <select id="task-subject" onchange="updateSubSubjectOptions(); updateTaskSelectOptions();">
           <option value="英語">英語</option>
           <option value="国語">国語</option>
           <option value="日本史">日本史</option>
@@ -425,8 +444,11 @@
 
         <div class="inline-inputs" style="margin-top:10px;">
           <div>
-            <label for="task-name">教材・タスク名</label>
-            <input type="text" id="task-name" placeholder="例: ポラリス1">
+            <label for="task-select">教材・タスクを選択（または直接追加）</label>
+            <select id="task-select" onchange="handleTaskSelectChange()">
+              <!-- 登録済みアイテム -->
+            </select>
+            <input type="text" id="task-name-custom" placeholder="新規教材名を入力" style="display:none; margin-top:5px;">
           </div>
           <div>
             <label for="task-amount">進めた量</label>
@@ -434,7 +456,14 @@
           </div>
           <div>
             <label for="task-unit">単位</label>
-            <input type="text" id="task-unit" placeholder="例: p, 題, 単語">
+            <select id="task-unit-select" onchange="handleUnitSelectChange()">
+              <option value="p">p (ページ)</option>
+              <option value="題">題</option>
+              <option value="単語">単語</option>
+              <option value="章">章</option>
+              <option value="__NEW__">＋ 新しい単位を追加...</option>
+            </select>
+            <input type="text" id="task-unit-custom" placeholder="例: 講" style="display:none; margin-top:5px;">
           </div>
         </div>
 
@@ -457,7 +486,6 @@
       </div>
     </div>
 
-    <!-- 円グラフ 3連配置 -->
     <div class="charts-grid-3col">
       <div class="card">
         <h2>全体バランス</h2>
@@ -502,7 +530,53 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
 
 <script>
   let studyLogs = [];
+  let savedTasks = {
+    '英語': ['ターゲット1900', 'ポラリス1', '肘井の読解'],
+    '国語': ['開発講座', '古文単語315', '岡本古文文法'],
+    '日本史': ['東進一問一答', '実況中継1'],
+    'その他': ['小論文演習']
+  };
+  let customUnits = ['p', '題', '単語', '章'];
+
   let barChart, pieChartMain, pieChartEnglish, pieChartJapanese;
+
+  function saveData() {
+    localStorage.setItem('waseda_study_logs', JSON.stringify(studyLogs));
+    localStorage.setItem('waseda_saved_tasks', JSON.stringify(savedTasks));
+    localStorage.setItem('waseda_custom_units', JSON.stringify(customUnits));
+    localStorage.setItem('waseda_api_key', document.getElementById('api-key').value);
+    
+    const goals = {
+      english: document.getElementById('goal-english').value,
+      japanese: document.getElementById('goal-japanese').value,
+      history: document.getElementById('goal-history').value,
+      other: document.getElementById('goal-other').value
+    };
+    localStorage.setItem('waseda_goals', JSON.stringify(goals));
+  }
+
+  function loadData() {
+    const logs = localStorage.getItem('waseda_study_logs');
+    if (logs) studyLogs = JSON.parse(logs);
+
+    const tasks = localStorage.getItem('waseda_saved_tasks');
+    if (tasks) savedTasks = JSON.parse(tasks);
+
+    const units = localStorage.getItem('waseda_custom_units');
+    if (units) customUnits = JSON.parse(units);
+
+    const key = localStorage.getItem('waseda_api_key');
+    if (key) document.getElementById('api-key').value = key;
+
+    const goals = localStorage.getItem('waseda_goals');
+    if (goals) {
+      const g = JSON.parse(goals);
+      if (g.english) document.getElementById('goal-english').value = g.english;
+      if (g.japanese) document.getElementById('goal-japanese').value = g.japanese;
+      if (g.history) document.getElementById('goal-history').value = g.history;
+      if (g.other) document.getElementById('goal-other').value = g.other;
+    }
+  }
 
   function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -541,14 +615,109 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     });
   }
 
+  function updateTaskSelectOptions() {
+    const subject = document.getElementById('task-subject').value;
+    const select = document.getElementById('task-select');
+    const customInput = document.getElementById('task-name-custom');
+    
+    select.innerHTML = '';
+    const list = savedTasks[subject] || [];
+
+    list.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item;
+      opt.innerText = item;
+      select.appendChild(opt);
+    });
+
+    const newOpt = document.createElement('option');
+    newOpt.value = '__NEW__';
+    newOpt.innerText = '＋ 新しい教材を追加...';
+    select.appendChild(newOpt);
+
+    if (list.length === 0) {
+      select.value = '__NEW__';
+      customInput.style.display = 'block';
+    } else {
+      customInput.style.display = 'none';
+    }
+  }
+
+  function handleTaskSelectChange() {
+    const select = document.getElementById('task-select');
+    const customInput = document.getElementById('task-name-custom');
+    if (select.value === '__NEW__') {
+      customInput.style.display = 'block';
+      customInput.focus();
+    } else {
+      customInput.style.display = 'none';
+    }
+  }
+
+  function renderUnitSelectOptions() {
+    const select = document.getElementById('task-unit-select');
+    select.innerHTML = '';
+
+    customUnits.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u;
+      opt.innerText = u;
+      select.appendChild(opt);
+    });
+
+    const newOpt = document.createElement('option');
+    newOpt.value = '__NEW__';
+    newOpt.innerText = '＋ 新しい単位を追加...';
+    select.appendChild(newOpt);
+  }
+
+  function handleUnitSelectChange() {
+    const select = document.getElementById('task-unit-select');
+    const customInput = document.getElementById('task-unit-custom');
+    if (select.value === '__NEW__') {
+      customInput.style.display = 'block';
+      customInput.focus();
+    } else {
+      customInput.style.display = 'none';
+    }
+  }
+
   function addStudyLog() {
     const subject = document.getElementById('task-subject').value;
     const subSubject = document.getElementById('task-sub-subject').value;
-    const name = document.getElementById('task-name').value || '学習';
-    const amount = parseFloat(document.getElementById('task-amount').value) || 0;
-    const unit = document.getElementById('task-unit').value || '項';
+    
+    const taskSelect = document.getElementById('task-select');
+    const customTaskInput = document.getElementById('task-name-custom');
+    let taskName = '';
 
+    if (taskSelect.value === '__NEW__') {
+      taskName = customTaskInput.value.trim();
+      if (!taskName) return alert('教材名を入力してください。');
+      
+      if (!savedTasks[subject]) savedTasks[subject] = [];
+      if (!savedTasks[subject].includes(taskName)) {
+        savedTasks[subject].push(taskName);
+      }
+    } else {
+      taskName = taskSelect.value;
+    }
+
+    const amount = parseFloat(document.getElementById('task-amount').value) || 0;
     if (amount <= 0) return alert('正しい量を入力してください。');
+
+    const unitSelect = document.getElementById('task-unit-select');
+    const customUnitInput = document.getElementById('task-unit-custom');
+    let unitName = '';
+
+    if (unitSelect.value === '__NEW__') {
+      unitName = customUnitInput.value.trim();
+      if (!unitName) return alert('単位を入力してください。');
+      if (!customUnits.includes(unitName)) {
+        customUnits.push(unitName);
+      }
+    } else {
+      unitName = unitSelect.value;
+    }
 
     const today = new Date();
     const dateStr = `${today.getMonth()+1}/${today.getDate()}`;
@@ -558,18 +727,26 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
       date: dateStr,
       subject,
       subSubject,
-      name,
+      name: taskName,
       amount,
-      unit
+      unit: unitName
     });
 
+    saveData();
     renderLogList();
     updateGoalProgress();
+    
+    renderUnitSelectOptions();
+    updateTaskSelectOptions();
+    customTaskInput.value = '';
+    customUnitInput.value = '';
+
     alert('学習ログを登録しました！');
   }
 
   function deleteLog(id) {
     studyLogs = studyLogs.filter(log => log.id !== id);
+    saveData();
     renderLogList();
     updateGoalProgress();
     if (document.getElementById('partner-page').classList.contains('active')) {
@@ -583,11 +760,11 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     listEl.innerHTML = '';
 
     if (studyLogs.length === 0) {
-      listEl.innerHTML = '<li style="text-align:center; color:var(--text-sub); padding:15px;">ログはまだありません（ゼロからスタート）</li>';
+      listEl.innerHTML = '<li style="text-align:center; color:var(--text-sub); padding:15px;">ログはまだありません</li>';
       return;
     }
 
-    studyLogs.forEach(log => {
+    studyLogs.slice().reverse().forEach(log => {
       let badgeClass = 'bg-other';
       if (log.subject === '英語') badgeClass = 'bg-english';
       if (log.subject === '国語') badgeClass = 'bg-japanese';
@@ -607,7 +784,7 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     });
   }
 
-  // 各科目ごとの進捗バー更新
+  // 進捗バーの更新 & 達成（MAX）時の色変化ロジック
   function updateGoalProgress() {
     const subjects = [
       { key: 'english', label: '英語' },
@@ -633,15 +810,18 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
       fillBar.style.width = `${percentage}%`;
 
       const checkMark = document.getElementById(`check-${sub.key}`);
+
+      // 目標達成時の判定（100%以上）
       if (todayVal >= goalMax && goalMax > 0) {
         checkMark.classList.add('active');
+        fillBar.classList.add('completed'); // ゲージ色を深い濃色に変更
       } else {
         checkMark.classList.remove('active');
+        fillBar.classList.remove('completed'); // 通常色に戻す
       }
     });
   }
 
-  // Chart.js（バーの太さを細く設定: barPercentage & categoryPercentage）
   function initCharts() {
     const ctxBar = document.getElementById('barChart').getContext('2d');
     barChart = new Chart(ctxBar, {
@@ -666,7 +846,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
       }
     });
 
-    // 円グラフ：全体
     const ctxMain = document.getElementById('pieChartMain').getContext('2d');
     pieChartMain = new Chart(ctxMain, {
       type: 'doughnut',
@@ -677,7 +856,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
       options: { responsive: true, maintainAspectRatio: false }
     });
 
-    // 円グラフ：英語内訳
     const ctxEng = document.getElementById('pieChartEnglish').getContext('2d');
     pieChartEnglish = new Chart(ctxEng, {
       type: 'doughnut',
@@ -688,7 +866,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
       options: { responsive: true, maintainAspectRatio: false }
     });
 
-    // 円グラフ：国語内訳
     const ctxJpn = document.getElementById('pieChartJapanese').getContext('2d');
     pieChartJapanese = new Chart(ctxJpn, {
       type: 'doughnut',
@@ -720,7 +897,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     barChart.data.datasets[3].data = othData;
     barChart.update();
 
-    // 全体円グラフ
     const mainTot = {
       eng: studyLogs.filter(l => l.subject === '英語').reduce((s, l) => s + l.amount, 0),
       jpn: studyLogs.filter(l => l.subject === '国語').reduce((s, l) => s + l.amount, 0),
@@ -730,7 +906,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     pieChartMain.data.datasets[0].data = [mainTot.eng, mainTot.jpn, mainTot.his, mainTot.oth];
     pieChartMain.update();
 
-    // 英語円グラフ
     const engLogs = studyLogs.filter(l => l.subject === '英語');
     pieChartEnglish.data.datasets[0].data = [
       engLogs.filter(l => l.subSubject === '単語').reduce((s, l) => s + l.amount, 0),
@@ -740,7 +915,6 @@ AIキーを設定し、相談内容を入力してボタンを押すと、記録
     ];
     pieChartEnglish.update();
 
-    // 国語円グラフ
     const jpnLogs = studyLogs.filter(l => l.subject === '国語');
     pieChartJapanese.data.datasets[0].data = [
       jpnLogs.filter(l => l.subSubject === '現代文').reduce((s, l) => s + l.amount, 0),
@@ -836,8 +1010,12 @@ ${reflection || "特になし。"}
   }
 
   window.onload = function() {
+    loadData();
     updateSubSubjectOptions();
+    renderUnitSelectOptions();
+    updateTaskSelectOptions();
     initCharts();
+    renderLogList();
     updateGoalProgress();
   };
 </script>
