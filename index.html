@@ -1,5 +1,52 @@
 <!DOCTYPE html>
 <html lang="ja">
+  <!-- Firebase 読み込み ＆ ログイン機能 -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  // Firebaseの設定
+  const firebaseConfig = {
+    apiKey: "AIzaSyCh9gzYEt4TQLQYdVHgbTQ64F6veOWNMWU",
+    authDomain: "study-game-3370b.firebaseapp.com",
+    projectId: "study-game-3370b",
+    storageBucket: "study-game-3370b.firebasestorage.app",
+    messagingSenderId: "1022761221608",
+    appId: "1:1022761221608:web:6f939b78d2c9754284b85d",
+    measurementId: "G-VBFT1RN23E"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // ログイン処理（ボタンを押したとき用）
+  window.loginWithGoogle = function() {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+        alert(`ログインしました: ${user.displayName}さん`);
+      })
+      .catch((error) => {
+        console.error("ログインエラー:", error);
+      });
+  };
+
+  // ログイン状態の監視
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("ログイン中ユーザー:", user.displayName, user.email);
+      // 画面にユーザー名を表示したい場合はここに処理を書きます
+    } else {
+      console.log("未ログイン状態");
+    }
+  });
+</script>
+
+<!-- ログインボタン（HTML内の表示したい場所へ設置） -->
+<button onclick="loginWithGoogle()" style="padding: 10px 15px; cursor: pointer;">
+  Googleでログイン
+</button>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
