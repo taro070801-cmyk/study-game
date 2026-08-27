@@ -3,94 +3,218 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Study Task Tracker</title>
+  <title>QUEST COUNTER - DRAGON STYLE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #6366f1;
-      --accent-active: #4f46e5;
-      --text: #f8fafc;
-      --subtext: #94a3b8;
-      --border: #334155;
+      --dq-bg: #000000;
+      --dq-window-bg: #000000;
+      --dq-border: #ffffff;
+      --dq-text: #ffffff;
+      --dq-yellow: #facc15;
+      --dq-green: #4ade80;
+      --dq-red: #ef4444;
+      --dq-gray: #6b7280;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'DotGothic16', monospace;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: var(--dq-bg);
+      color: var(--dq-text);
       display: flex;
       justify-content: center;
-      padding: 16px;
+      padding: 12px;
       min-height: 100vh;
+      background-image: 
+        radial-gradient(#111827 1px, transparent 0);
+      background-size: 8px 8px;
     }
 
     .container {
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
     }
 
-    header {
+    /* DQ Window Style Border */
+    .dq-window {
+      background: var(--dq-window-bg);
+      border: 4px solid var(--dq-border);
+      border-radius: 6px;
+      box-shadow: 0 0 0 2px #000000, inset 0 0 0 2px #000000;
+      padding: 16px;
+      position: relative;
+    }
+
+    /* Total Score Box */
+    .status-window {
       text-align: center;
-      margin-bottom: 20px;
-      padding: 24px 16px;
-      background: var(--card);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
-    .total-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--subtext);
-      letter-spacing: 0.1em;
+    .status-header {
+      font-family: 'Press Start 2P', 'DotGothic16', monospace;
+      font-size: 0.85rem;
+      color: var(--dq-yellow);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
     }
 
-    .total-pt-container {
-      margin-top: 4px;
+    .score-container {
       display: flex;
       align-items: baseline;
       justify-content: center;
-      gap: 4px;
+      gap: 8px;
     }
 
     .total-pt {
-      font-size: 3.75rem;
-      font-weight: 900;
-      color: #fff;
-      line-height: 1;
-      transition: transform 0.1s ease;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 2.8rem;
+      color: var(--dq-yellow);
+      text-shadow: 3px 3px 0px #78350f;
     }
 
-    .total-unit {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--accent);
+    .unit {
+      font-size: 1.2rem;
+      color: var(--dq-text);
     }
 
-    .task-list {
+    /* Chart Section */
+    .chart-title {
+      font-size: 1rem;
+      color: var(--dq-yellow);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chart-container {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      margin-bottom: 20px;
     }
 
-    .task-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 16px;
+    .chart-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .chart-label-group {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+    }
+
+    .chart-bar-bg {
+      background: #1f2937;
+      border: 2px solid var(--dq-border);
+      height: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #16a34a, var(--dq-green));
+      width: 0%;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Quest List Section */
+    .section-title {
+      font-size: 1.05rem;
+      color: var(--dq-yellow);
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .add-task-toggle {
+      background: var(--dq-window-bg);
+      color: var(--dq-yellow);
+      border: 2px solid var(--dq-border);
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .add-task-toggle:active {
+      background: var(--dq-yellow);
+      color: #000;
+    }
+
+    /* Add Form */
+    .add-form {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px dashed var(--dq-border);
+    }
+
+    .add-form.open {
+      display: flex;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dq-input {
+      background: #000;
+      color: #fff;
+      border: 2px solid var(--dq-border);
+      padding: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .dq-input:focus {
+      border-color: var(--dq-yellow);
+    }
+
+    .save-btn {
+      background: var(--dq-yellow);
+      color: #000;
+      border: 2px solid var(--dq-border);
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Task List */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #000;
+      border: 2px solid var(--dq-border);
+      padding: 10px 12px;
+      position: relative;
     }
 
     .task-info {
@@ -99,214 +223,404 @@
       gap: 2px;
     }
 
+    .task-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dq-cursor {
+      color: var(--dq-yellow);
+      font-size: 0.8rem;
+    }
+
     .task-name {
-      font-weight: 700;
       font-size: 1.05rem;
+      color: #fff;
     }
 
     .task-rule {
-      font-size: 0.75rem;
-      color: var(--subtext);
+      font-size: 0.8rem;
+      color: var(--dq-gray);
     }
 
     .task-count {
-      font-size: 0.8rem;
-      color: var(--accent);
-      margin-top: 4px;
-      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--dq-green);
     }
 
-    .add-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 18px;
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-add {
+      background: #000;
+      color: var(--dq-yellow);
+      border: 2px solid var(--dq-yellow);
+      padding: 8px 12px;
       font-size: 0.95rem;
-      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-      transition: all 0.1s ease;
     }
 
-    .add-btn:active {
-      background: var(--accent-active);
+    .btn-add:active {
+      background: var(--dq-yellow);
+      color: #000;
       transform: scale(0.95);
     }
 
-    .logs-container {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-    }
-
-    .logs-header {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--subtext);
-      letter-spacing: 0.05em;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .clear-btn {
+    .btn-delete {
       background: transparent;
-      border: none;
-      color: #ef4444;
+      color: var(--dq-red);
+      border: 1px solid var(--dq-red);
+      padding: 6px 8px;
       font-size: 0.75rem;
       cursor: pointer;
-      padding: 4px 8px;
     }
 
+    .btn-delete:hover {
+      background: var(--dq-red);
+      color: #fff;
+    }
+
+    /* Activity Log List with Delete */
     .log-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      max-height: 180px;
+      gap: 6px;
+      max-height: 160px;
       overflow-y: auto;
     }
 
     .log-item {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 0.85rem;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+      border-bottom: 1px dashed #333;
     }
 
-    .log-date {
-      color: var(--subtext);
-      font-size: 0.75rem;
+    .log-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .scale-up {
-      transform: scale(1.15);
+    .log-del-btn {
+      background: none;
+      border: none;
+      color: var(--dq-red);
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* EXP Floating Banner Effect */
+    .exp-popup {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      background: rgba(0, 0, 0, 0.95);
+      border: 4px solid var(--dq-yellow);
+      padding: 16px 28px;
+      color: var(--dq-yellow);
+      font-size: 1.5rem;
+      font-family: 'Press Start 2P', 'DotGothic16', monospace;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 100;
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.6);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .exp-popup.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <header>
-    <div class="total-title">TOTAL ACCUMULATED</div>
-    <div class="total-pt-container">
+
+  <!-- Status Window (Total Points) -->
+  <div class="dq-window status-window">
+    <div class="status-header">▶ けいけんち（TOTAL EXP）</div>
+    <div class="score-container">
       <span class="total-pt" id="total-pt">0</span>
-      <span class="total-unit">pt</span>
+      <span class="unit">EXP</span>
     </div>
-  </header>
+  </div>
 
-  <div class="task-list" id="task-list"></div>
+  <!-- Chart Window -->
+  <div class="dq-window">
+    <div class="chart-title">▶ くえすと・しんちょうど（グラフ）</div>
+    <div class="chart-container" id="chart-container"></div>
+  </div>
 
-  <div class="logs-container">
-    <div class="logs-header">
-      <span>RECENT ACTIVITY</span>
-      <button class="clear-btn" id="clear-btn">リセット</button>
+  <!-- Task Control Window -->
+  <div class="dq-window">
+    <div class="section-title">
+      <span>▶ くえすと・いちらん</span>
+      <button class="add-task-toggle" onclick="toggleAddForm()">＋ ついか</button>
+    </div>
+
+    <!-- Dynamic Add Form -->
+    <div class="add-form" id="add-form">
+      <div class="input-group">
+        <input type="text" id="new-name" class="dq-input" placeholder="項目名 (例: 早稲田日本史)" />
+      </div>
+      <div class="input-group">
+        <input type="text" id="new-unit" class="dq-input" placeholder="単位/ルール (例: 10問)" />
+        <input type="number" id="new-pt" class="dq-input" style="width: 90px;" placeholder="獲得pt" value="1" min="1" />
+      </div>
+      <button class="save-btn" onclick="addNewTask()">＋ くえすとをついか</button>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list" id="task-list"></div>
+  </div>
+
+  <!-- Log Window -->
+  <div class="dq-window">
+    <div class="section-title">
+      <span>▶ ぼうけんのきろく（りれき）</span>
+      <button class="btn-delete" onclick="clearAllData()">ぜんぶけす</button>
     </div>
     <ul class="log-list" id="log-list"></ul>
   </div>
+
+</div>
+
+<!-- Effect Popup -->
+<div class="exp-popup" id="exp-popup">
+  <div>★ EXP GET! ★</div>
+  <div id="exp-popup-val" style="font-size: 1.2rem; margin-top: 6px; color: #fff;">+1 EXP</div>
 </div>
 
 <script>
-  // 学習タスクの定義
-  const TASKS = [
-    { id: 'english', name: '英語長文', rule: '1題 完了', pt: 1 },
-    { id: 'modern', name: '現代文', rule: '1題 完了', pt: 1 },
-    { id: 'classic', name: '古文', rule: '1題 完了', pt: 1 },
-    { id: 'words', name: '単語・用語', rule: '50個 確認', pt: 1 },
-    { id: 'questions', name: '問題集・文法', rule: '10問 完了', pt: 1 }
+  // Default Tasks
+  const DEFAULT_TASKS = [
+    { id: 't_1', name: '英語長文', unit: '1題 完了', pt: 1 },
+    { id: 't_2', name: '現代文', unit: '1題 完了', pt: 1 },
+    { id: 't_3', name: '古文', unit: '1題 完了', pt: 1 },
+    { id: 't_4', name: '英単語', unit: '50個 確認', pt: 1 },
+    { id: 't_5', name: '問題集', unit: '10問 完了', pt: 1 }
   ];
 
-  // ローカルストレージからのデータ取得
-  let state = JSON.parse(localStorage.getItem('study_tracker_data')) || {
+  // Application State
+  let state = JSON.parse(localStorage.getItem('dq_study_tracker_data')) || {
     totalPt: 0,
-    counts: { english: 0, modern: 0, classic: 0, words: 0, questions: 0 },
+    tasks: DEFAULT_TASKS,
+    counts: { t_1: 0, t_2: 0, t_3: 0, t_4: 0, t_5: 0 },
     logs: []
   };
 
   function saveData() {
-    localStorage.setItem('study_tracker_data', JSON.stringify(state));
+    localStorage.setItem('dq_study_tracker_data', JSON.stringify(state));
   }
 
   function render() {
-    // ポイント表示
-    const totalPtEl = document.getElementById('total-pt');
-    totalPtEl.textContent = state.totalPt;
+    // 1. Total EXP
+    document.getElementById('total-pt').textContent = state.totalPt;
 
-    // タスクカードの生成
+    // 2. Render Task Cards
     const taskListEl = document.getElementById('task-list');
     taskListEl.innerHTML = '';
-    
-    TASKS.forEach(task => {
+
+    state.tasks.forEach(task => {
       const count = state.counts[task.id] || 0;
       const card = document.createElement('div');
       card.className = 'task-card';
       card.innerHTML = `
         <div class="task-info">
-          <div class="task-name">${task.name}</div>
-          <div class="task-rule">${task.rule}</div>
-          <div class="task-count">累計 ${count} 完了</div>
+          <div class="task-name-row">
+            <span class="dq-cursor">▶</span>
+            <span class="task-name">${task.name}</span>
+          </div>
+          <div class="task-rule">たんい: ${task.unit} (+${task.pt}EXP)</div>
+          <div class="task-count">たっせい: ${count} かい</div>
         </div>
-        <button class="add-btn" onclick="addPt('${task.id}')">+${task.pt} pt</button>
+        <div class="action-group">
+          <button class="btn-add" onclick="addPt('${task.id}')">＋${task.pt} EXP</button>
+          <button class="btn-delete" onclick="deleteTask('${task.id}')">さくじょ</button>
+        </div>
       `;
       taskListEl.appendChild(card);
     });
 
-    // 履歴表示（最新順）
+    // 3. Render Bar Chart
+    const chartContainerEl = document.getElementById('chart-container');
+    chartContainerEl.innerHTML = '';
+
+    let maxPt = 0;
+    state.tasks.forEach(task => {
+      const taskTotal = (state.counts[task.id] || 0) * task.pt;
+      if (taskTotal > maxPt) maxPt = taskTotal;
+    });
+
+    state.tasks.forEach(task => {
+      const taskTotalPt = (state.counts[task.id] || 0) * task.pt;
+      const percent = maxPt > 0 ? (taskTotalPt / maxPt) * 100 : 0;
+
+      const row = document.createElement('div');
+      row.className = 'chart-row';
+      row.innerHTML = `
+        <div class="chart-label-group">
+          <span>${task.name}</span>
+          <span style="color: var(--dq-yellow);">${taskTotalPt} EXP</span>
+        </div>
+        <div class="chart-bar-bg">
+          <div class="chart-bar-fill" style="width: ${percent}%;"></div>
+        </div>
+      `;
+      chartContainerEl.appendChild(row);
+    });
+
+    // 4. Render Logs with Individual Delete
     const logListEl = document.getElementById('log-list');
     logListEl.innerHTML = '';
-    state.logs.slice().reverse().forEach(log => {
-      const li = document.createElement('li');
-      li.className = 'log-item';
-      li.innerHTML = `
-        <span>${log.taskName} (+${log.pt}pt)</span>
-        <span class="log-date">${log.date}</span>
-      `;
-      logListEl.appendChild(li);
-    });
+
+    if (state.logs.length === 0) {
+      logListEl.innerHTML = '<li style="color: var(--dq-gray); text-align: center; font-size: 0.8rem;">きろくが ありません</li>';
+    } else {
+      state.logs.slice().reverse().forEach(log => {
+        const li = document.createElement('li');
+        li.className = 'log-item';
+        li.innerHTML = `
+          <div class="log-left">
+            <button class="log-del-btn" onclick="deleteLog('${log.logId}')">✕</button>
+            <span>${log.taskName} (+${log.pt}EXP)</span>
+          </div>
+          <span style="color: var(--dq-gray);">${log.date}</span>
+        `;
+        logListEl.appendChild(li);
+      });
+    }
   }
 
+  // Add Points
   function addPt(taskId) {
-    const task = TASKS.find(t => t.id === taskId);
+    const task = state.tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    state.totalPt += task.pt;
+    const gainPt = Number(task.pt) || 1;
+    state.totalPt += gainPt;
     state.counts[taskId] = (state.counts[taskId] || 0) + 1;
 
     const now = new Date();
     const dateStr = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    
+
+    const logId = 'log_' + Date.now();
     state.logs.push({
+      logId: logId,
+      taskId: taskId,
       taskName: task.name,
-      pt: task.pt,
+      pt: gainPt,
       date: dateStr
     });
 
-    // アニメーション効果（即実利の演出）
-    const totalPtEl = document.getElementById('total-pt');
-    totalPtEl.classList.add('scale-up');
-    setTimeout(() => totalPtEl.classList.remove('scale-up'), 150);
+    saveData();
+    render();
 
+    // DQ Effect
+    showExpEffect(`+${gainPt} EXP!`);
+  }
+
+  // Effect Banner
+  function showExpEffect(text) {
+    const popup = document.getElementById('exp-popup');
+    const valEl = document.getElementById('exp-popup-val');
+    valEl.textContent = text;
+
+    popup.classList.add('show');
+    setTimeout(() => {
+      popup.classList.remove('show');
+    }, 900);
+  }
+
+  // Delete Individual Task
+  function deleteTask(taskId) {
+    if (confirm('このくえすとを さくじょしますか？')) {
+      state.tasks = state.tasks.filter(t => t.id !== taskId);
+      delete state.counts[taskId];
+      saveData();
+      render();
+    }
+  }
+
+  // Delete Individual Log Item
+  function deleteLog(logId) {
+    const targetLog = state.logs.find(l => l.logId === logId);
+    if (!targetLog) return;
+
+    state.totalPt = Math.max(0, state.totalPt - targetLog.pt);
+    if (state.counts[targetLog.taskId]) {
+      state.counts[targetLog.taskId] = Math.max(0, state.counts[targetLog.taskId] - 1);
+    }
+
+    state.logs = state.logs.filter(l => l.logId !== logId);
     saveData();
     render();
   }
 
-  document.getElementById('clear-btn').addEventListener('click', () => {
-    if (confirm('すべてのデータをリセットしますか？')) {
+  // Add Custom Task
+  function toggleAddForm() {
+    const form = document.getElementById('add-form');
+    form.classList.toggle('open');
+  }
+
+  function addNewTask() {
+    const nameInput = document.getElementById('new-name');
+    const unitInput = document.getElementById('new-unit');
+    const ptInput = document.getElementById('new-pt');
+
+    const name = nameInput.value.trim();
+    const unit = unitInput.value.trim() || '1回';
+    const pt = parseInt(ptInput.value, 10) || 1;
+
+    if (!name) {
+      alert('こうもくめいを にゅうりょくしてください');
+      return;
+    }
+
+    const newId = 't_' + Date.now();
+    state.tasks.push({
+      id: newId,
+      name: name,
+      unit: unit,
+      pt: pt
+    });
+    state.counts[newId] = 0;
+
+    nameInput.value = '';
+    unitInput.value = '';
+    ptInput.value = '1';
+
+    toggleAddForm();
+    saveData();
+    render();
+  }
+
+  // Clear All Data
+  function clearAllData() {
+    if (confirm('すべての ぼうけんのきろくを さくじょしますか？')) {
       state = {
         totalPt: 0,
-        counts: { english: 0, modern: 0, classic: 0, words: 0, questions: 0 },
+        tasks: DEFAULT_TASKS,
+        counts: { t_1: 0, t_2: 0, t_3: 0, t_4: 0, t_5: 0 },
         logs: []
       };
       saveData();
       render();
     }
-  });
+  }
 
-  // 初期化
+  // Initial Render
   render();
 </script>
 
