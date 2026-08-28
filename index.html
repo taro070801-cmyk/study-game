@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>早稲田攻略 戦略ナビゲーター</title>
 
-  <!-- iOS PWA・アプリ表示設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -15,8 +14,6 @@
   <style>
     :root {
       --waseda-crimson: #660011;
-      --waseda-crimson-light: #8b0018;
-      --waseda-crimson-dark: #3f000a;
       --waseda-gold: #c5a059;
       --waseda-gold-light: #e8d3a7;
       
@@ -26,10 +23,11 @@
       --text-sub: #d1c4c6;
       --border-color: rgba(197, 160, 89, 0.3);
 
-      --subject-english: #d47a82;
-      --subject-japanese: #d4a373;
-      --subject-history: #81b29a;
-      --subject-other: #a8dadc;
+      /* 指定の落ち着いたカラー定義 */
+      --subject-english: #d47a82;  /* 落ち着いたピンク */
+      --subject-japanese: #d4a373; /* 落ち着いたオレンジ */
+      --subject-history: #81b29a;  /* 落ち着いた緑 */
+      --subject-other: #8d99ae;    /* 落ち着いたグレー */
     }
 
     * {
@@ -75,13 +73,6 @@
       font-family: "Georgia", serif;
     }
 
-    .header-sub {
-      font-size: 0.65rem;
-      color: var(--text-sub);
-      letter-spacing: 0.1em;
-    }
-
-    /* 🧠 【好奇心刺激】トリビアバナー */
     .trivia-box {
       background: rgba(197, 160, 89, 0.12);
       border: 1px dashed var(--waseda-gold);
@@ -95,9 +86,6 @@
       align-items: center;
     }
 
-    .trivia-icon { font-size: 1.2rem; }
-
-    /* ボトムナビゲーション */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -129,11 +117,7 @@
       width: 25%;
     }
 
-    .nav-item.active {
-      color: var(--waseda-gold);
-      font-weight: bold;
-    }
-
+    .nav-item.active { color: var(--waseda-gold); font-weight: bold; }
     .nav-icon { font-size: 1.2rem; }
 
     .tab-content { display: none; }
@@ -158,13 +142,11 @@
       font-weight: 600;
     }
 
-    /* 🧠 ドパミン報酬系エリア */
     .hero-pt-box {
       text-align: center;
       padding: 16px 10px;
       background: radial-gradient(circle, rgba(197, 160, 89, 0.15) 0%, rgba(0,0,0,0) 70%);
       border-radius: 20px;
-      position: relative;
     }
 
     .rank-badge {
@@ -195,7 +177,6 @@
       text-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
     }
 
-    /* 🧠 【収集欲求】バッジ一覧 */
     .badge-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -226,7 +207,6 @@
     .badge-name { font-size: 0.65rem; color: var(--waseda-gold-light); font-weight: bold; }
     .badge-req { font-size: 0.55rem; color: var(--text-sub); }
 
-    /* 進捗メーター */
     .goal-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -266,7 +246,6 @@
     .fill-history { background: var(--subject-history); }
     .fill-other { background: var(--subject-other); }
 
-    /* 入力フォーム */
     .date-row {
       display: flex;
       align-items: center;
@@ -292,7 +271,7 @@
       margin-bottom: 10px;
     }
 
-    select, input[type="text"] {
+    select, input[type="text"], input[type="number"] {
       width: 100%;
       padding: 12px;
       background: rgba(0, 0, 0, 0.4);
@@ -323,9 +302,7 @@
       gap: 8px;
     }
 
-    .action-btn:active {
-      transform: scale(0.96);
-    }
+    .action-btn:active { transform: scale(0.96); }
 
     .log-item {
       background: rgba(0,0,0,0.2);
@@ -336,7 +313,6 @@
       justify-content: space-between;
       align-items: center;
       font-size: 0.8rem;
-      border-left: 3px solid var(--waseda-gold);
     }
 
     .delete-btn {
@@ -345,12 +321,37 @@
       color: #ff6b6b;
       font-size: 0.85rem;
       padding: 4px;
+      cursor: pointer;
     }
 
-    .chart-box {
+    /* 2列グラフ配置用 */
+    .pie-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .chart-box-pie {
       position: relative;
-      height: 180px;
+      height: 160px;
       width: 100%;
+    }
+
+    .chart-box-bar {
+      position: relative;
+      height: 200px;
+      width: 100%;
+    }
+
+    .item-manage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
     }
   </style>
 </head>
@@ -360,16 +361,15 @@
   <header>
     <div>
       <h1>WASEDA NAVI</h1>
-      <div class="header-sub">早稲田大学合格 戦略統括ポータル</div>
+      <div style="font-size:0.65rem; color:var(--text-sub);">早稲田大学合格 戦略統括ポータル</div>
     </div>
     <div style="font-size: 0.75rem; color: var(--waseda-gold);">
       <span id="header-date"></span>
     </div>
   </header>
 
-  <!-- 🧠 好奇心を刺激する雑学・知識の隙間バナー -->
   <div class="trivia-box">
-    <span class="trivia-icon">💡</span>
+    <span style="font-size: 1.2rem;">💡</span>
     <div id="trivia-text">早稲田の入試雑学をロード中...</div>
   </div>
 
@@ -383,28 +383,26 @@
         <div style="font-size: 1rem; color: var(--waseda-gold); display: inline;">pt</div>
       </div>
 
-      <!-- 進捗ゲージ -->
       <div class="goal-grid" style="margin-top: 12px;">
-        <div class="goal-card">
-          <div class="goal-header"><span>英語</span><span><b id="val-english">0</b>/5pt</span></div>
+        <div class="goal-card" style="border-left: 3px solid var(--subject-english);">
+          <div class="goal-header"><span>英語</span><span><b id="val-english">0</b>/<span id="target-val-english">5</span>pt</span></div>
           <div class="progress-bar-bg"><div id="bar-english" class="progress-bar-fill fill-english"></div></div>
         </div>
-        <div class="goal-card">
-          <div class="goal-header"><span>国語</span><span><b id="val-japanese">0</b>/3pt</span></div>
+        <div class="goal-card" style="border-left: 3px solid var(--subject-japanese);">
+          <div class="goal-header"><span>国語</span><span><b id="val-japanese">0</b>/<span id="target-val-japanese">3</span>pt</span></div>
           <div class="progress-bar-bg"><div id="bar-japanese" class="progress-bar-fill fill-japanese"></div></div>
         </div>
-        <div class="goal-card">
-          <div class="goal-header"><span>日本史</span><span><b id="val-history">0</b>/4pt</span></div>
+        <div class="goal-card" style="border-left: 3px solid var(--subject-history);">
+          <div class="goal-header"><span>日本史</span><span><b id="val-history">0</b>/<span id="target-val-history">4</span>pt</span></div>
           <div class="progress-bar-bg"><div id="bar-history" class="progress-bar-fill fill-history"></div></div>
         </div>
-        <div class="goal-card">
-          <div class="goal-header"><span>その他</span><span><b id="val-other">0</b>/2pt</span></div>
+        <div class="goal-card" style="border-left: 3px solid var(--subject-other);">
+          <div class="goal-header"><span>その他</span><span><b id="val-other">0</b>/<span id="target-val-other">2</span>pt</span></div>
           <div class="progress-bar-bg"><div id="bar-other" class="progress-bar-fill fill-other"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- 爆速入力フォーム -->
     <div class="card">
       <h2>学習完了の記録</h2>
       <div class="date-row">
@@ -424,7 +422,7 @@
 
       <div style="margin-bottom: 12px;">
         <select id="task-name-select" onchange="handleTaskSelectChange()"></select>
-        <input type="text" id="task-name-custom" placeholder="教材名を入力" style="display:none; margin-top:8px;">
+        <input type="text" id="task-name-custom" placeholder="新規教材名を入力" style="display:none; margin-top:8px;">
       </div>
 
       <button type="button" class="action-btn" onclick="addPointWithDopamine()">
@@ -438,22 +436,42 @@
     </div>
   </div>
 
-  <!-- TAB 2: 🧠 収集本能（コレクトバッジ） -->
+  <!-- TAB 2: 🏆 バッジ -->
   <div id="tab-badges" class="tab-content">
     <div class="card">
       <h2>早稲田栄誉バッジ集</h2>
       <p style="font-size: 0.75rem; color: var(--text-sub); margin-bottom: 10px;">ポイントを積み上げて伝統の称号をコンプリートせよ。</p>
-      
       <div class="badge-grid" id="badge-container"></div>
     </div>
   </div>
 
-  <!-- TAB 3: 分析・AI -->
+  <!-- TAB 3: 📊 分析・円グラフ・積立グラフ -->
   <div id="tab-analytics" class="tab-content">
+    
+    <!-- 本日の学習内訳（円グラフ2種） -->
     <div class="card">
-      <h2>学習積み上げ推移</h2>
-      <div class="chart-box">
-        <canvas id="barChart"></canvas>
+      <h2>本日の学習バランス</h2>
+      <div class="pie-grid">
+        <div>
+          <div style="font-size:0.75rem; text-align:center; color:var(--waseda-gold-light); margin-bottom:4px;">全科目割合</div>
+          <div class="chart-box-pie">
+            <canvas id="subjectPieChart"></canvas>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:0.75rem; text-align:center; color:var(--subject-japanese); margin-bottom:4px;">国語グループ内訳</div>
+          <div class="chart-box-pie">
+            <canvas id="japanesePieChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 積み上げ推移グラフ -->
+    <div class="card">
+      <h2>科目別 積み上げ推移</h2>
+      <div class="chart-box-bar">
+        <canvas id="stackedBarChart"></canvas>
       </div>
     </div>
 
@@ -465,15 +483,42 @@
     </div>
   </div>
 
-  <!-- TAB 4: 設定 -->
+  <!-- TAB 4: ⚙️ 設定 & 項目削除・目標設定 -->
   <div id="tab-settings" class="tab-content">
+    
+    <!-- 目標設定カード -->
     <div class="card">
-      <h2>設定</h2>
+      <h2>1日の目標pt設定</h2>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.8rem;">
+        <div>英語目標: <input type="number" id="target-input-english" value="5" min="1"></div>
+        <div>国語目標: <input type="number" id="target-input-japanese" value="3" min="1"></div>
+        <div>日本史目標: <input type="number" id="target-input-history" value="4" min="1"></div>
+        <div>その他目標: <input type="number" id="target-input-other" value="2" min="1"></div>
+      </div>
+      <button type="button" class="action-btn" style="font-size:0.85rem; padding:10px; margin-top:12px;" onclick="saveTargets()">目標を変更保存</button>
+    </div>
+
+    <!-- 教材項目の管理・削除カード -->
+    <div class="card">
+      <h2>登録教材の削除・管理</h2>
+      <div style="margin-bottom:10px;">
+        <select id="manage-subject-select" onchange="renderItemManageList()">
+          <option value="英語">英語の教材一覧</option>
+          <option value="国語">国語の教材一覧</option>
+          <option value="日本史">日本史の教材一覧</option>
+          <option value="その他">その他の教材一覧</option>
+        </select>
+      </div>
+      <div id="item-manage-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>システム設定</h2>
       <div style="display:flex; flex-direction:column; gap:10px;">
         <label style="font-size:0.8rem;">Gemini API Key</label>
         <input type="password" id="api-key" placeholder="AIキーを入力" onchange="saveKey()">
         <button type="button" onclick="clearAllData()" style="background:#8b0000; color:white; border:none; padding:12px; border-radius:10px; font-weight:bold; margin-top:20px;">
-          ⚠️ 履歴を完全削除してやり直す
+          ⚠️ データを完全初期化する
         </button>
       </div>
     </div>
@@ -504,6 +549,27 @@
 <script>
   let studyLogs = [];
   
+  let targetPoints = {
+    '英語': 5,
+    '国語': 3,
+    '日本史': 4,
+    'その他': 2
+  };
+
+  let savedTasks = {
+    '英語': ['単熟語EX準1級', 'ポラリス1', '肘井の読解'],
+    '国語': ['開発講座', '古文単語315', '岡本古文文法'],
+    '日本史': ['東進一問一答', '実況中継1'],
+    'その他': ['小論文演習']
+  };
+  
+  const savedSubSubjects = {
+    '英語': ['単語', '文法', '解釈', '長文'],
+    '国語': ['現代文', '古文', '漢文'],
+    '日本史': ['通史', '文化史', '史料', '一問一答'],
+    'その他': ['その他']
+  };
+
   const trivias = [
     "【日本史】早稲田創設者の大隈重信は、実は生涯で一度も自分の著書を書いたことがない（全て口述筆記）。",
     "【早稲田トリビア】大隈講堂の時計塔は「人生100年説」にちなんで100尺（約30m）の高さで作られた。",
@@ -522,21 +588,9 @@
     { id: 8, name: "早稲田王", icon: "👑", req: 230 }
   ];
 
-  let savedTasks = {
-    '英語': ['単熟語EX準1級', 'ポラリス1', '肘井の読解'],
-    '国語': ['開発講座', '古文単語315', '岡本古文文法'],
-    '日本史': ['東進一問一答', '実況中継1'],
-    'その他': ['小論文演習']
-  };
-  
-  let savedSubSubjects = {
-    '英語': ['単語', '文法', '解釈', '長文'],
-    '国語': ['現代文', '古文', '漢文'],
-    '日本史': ['通史', '文化史', '史料', '一問一答'],
-    'その他': ['その他']
-  };
-
-  let barChart = null;
+  let subjectPieChart = null;
+  let japanesePieChart = null;
+  let stackedBarChart = null;
 
   function getTodayISO() {
     const d = new Date();
@@ -544,7 +598,7 @@
   }
 
   function init() {
-    localStorage.removeItem('waseda_study_logs'); // 完全リセット保証
+    localStorage.removeItem('waseda_study_logs');
     
     document.getElementById('task-date').value = getTodayISO();
     document.getElementById('header-date').innerText = getTodayISO().replace(/-/g, '/');
@@ -555,7 +609,8 @@
     renderLogs();
     updateProgress();
     renderBadges();
-    initChart();
+    renderItemManageList();
+    initCharts();
   }
 
   function showRandomTrivia() {
@@ -570,8 +625,9 @@
     document.getElementById(tabId).classList.add('active');
     btn.classList.add('active');
 
-    if (tabId === 'tab-analytics') updateChart();
+    if (tabId === 'tab-analytics') updateCharts();
     if (tabId === 'tab-badges') renderBadges();
+    if (tabId === 'tab-settings') renderItemManageList();
   }
 
   function onDateChange() {
@@ -597,7 +653,6 @@
       select.innerHTML += `<option value="${t}">${t}</option>`;
     });
     select.innerHTML += `<option value="__NEW__">＋ 新規教材を入力</option>`;
-    
     handleTaskSelectChange();
   }
 
@@ -617,6 +672,11 @@
     
     let taskName = select.value === '__NEW__' ? customInput.value.trim() : select.value;
     if (!taskName) return alert('教材名を入力してください');
+
+    if (select.value === '__NEW__' && !savedTasks[subject].includes(taskName)) {
+      savedTasks[subject].push(taskName);
+      updateTaskOptions();
+    }
 
     studyLogs.push({
       id: Date.now(),
@@ -655,6 +715,50 @@
     renderBadges();
   }
 
+  /* 項目（教材）削除機能 */
+  function deleteMasterItem(subject, item) {
+    savedTasks[subject] = savedTasks[subject].filter(i => i !== item);
+    updateTaskOptions();
+    renderItemManageList();
+  }
+
+  function renderItemManageList() {
+    const subject = document.getElementById('manage-subject-select').value;
+    const listEl = document.getElementById('item-manage-list');
+    listEl.innerHTML = '';
+
+    const items = savedTasks[subject] || [];
+    if (items.length === 0) {
+      listEl.innerHTML = `<div style="font-size:0.75rem; color:var(--text-sub);">登録項目はありません</div>`;
+      return;
+    }
+
+    items.forEach(item => {
+      listEl.innerHTML += `
+        <div class="item-manage-row">
+          <span>${item}</span>
+          <button class="delete-btn" onclick="deleteMasterItem('${subject}', '${item}')">削除 ✕</button>
+        </div>
+      `;
+    });
+  }
+
+  /* 目標値の変更保存 */
+  function saveTargets() {
+    targetPoints['英語'] = parseInt(document.getElementById('target-input-english').value) || 1;
+    targetPoints['国語'] = parseInt(document.getElementById('target-input-japanese').value) || 1;
+    targetPoints['日本史'] = parseInt(document.getElementById('target-input-history').value) || 1;
+    targetPoints['その他'] = parseInt(document.getElementById('target-input-other').value) || 1;
+
+    document.getElementById('target-val-english').innerText = targetPoints['英語'];
+    document.getElementById('target-val-japanese').innerText = targetPoints['国語'];
+    document.getElementById('target-val-history').innerText = targetPoints['日本史'];
+    document.getElementById('target-val-other').innerText = targetPoints['その他'];
+
+    updateProgress();
+    alert('目標を更新しました');
+  }
+
   function renderLogs() {
     const date = document.getElementById('task-date').value;
     const listEl = document.getElementById('log-list');
@@ -666,11 +770,18 @@
       return;
     }
 
+    const colorMap = {
+      '英語': 'var(--subject-english)',
+      '国語': 'var(--subject-japanese)',
+      '日本史': 'var(--subject-history)',
+      'その他': 'var(--subject-other)'
+    };
+
     filtered.slice().reverse().forEach(l => {
       listEl.innerHTML += `
-        <div class="log-item">
+        <div class="log-item" style="border-left: 3px solid ${colorMap[l.subject]};">
           <div>
-            <b style="color:var(--waseda-gold);">[${l.subject}]</b> ${l.name}
+            <b style="color:${colorMap[l.subject]};">[${l.subject}]</b> ${l.name}
             <span style="font-size:0.7rem; color:var(--text-sub);">(${l.subSubject})</span>
           </div>
           <div>
@@ -684,13 +795,12 @@
 
   function updateProgress() {
     const date = document.getElementById('task-date').value;
-    const targets = { '英語': 5, '国語': 3, '日本史': 4, 'その他': 2 };
     const keys = { '英語': 'english', '国語': 'japanese', '日本史': 'history', 'その他': 'other' };
 
     let dayPt = 0;
 
-    Object.keys(targets).forEach(sub => {
-      const targetVal = targets[sub];
+    Object.keys(targetPoints).forEach(sub => {
+      const targetVal = targetPoints[sub];
       const count = studyLogs.filter(l => l.date === date && l.subject === sub).length;
       dayPt += count;
 
@@ -702,7 +812,6 @@
 
     document.getElementById('hero-pt').innerText = dayPt;
 
-    // 🧠 ランク更新（通算ポイントで進化）
     const totalPt = studyLogs.length;
     let rank = "早稲田の挑戦者";
     if (totalPt >= 10) rank = "鍛錬の浪人";
@@ -728,33 +837,101 @@
     });
   }
 
-  function initChart() {
-    const ctx = document.getElementById('barChart').getContext('2d');
-    barChart = new Chart(ctx, {
+  /* グラフ初期化 */
+  function initCharts() {
+    // 1. 全科目 円グラフ
+    const ctxPie1 = document.getElementById('subjectPieChart').getContext('2d');
+    subjectPieChart = new Chart(ctxPie1, {
+      type: 'doughnut',
+      data: {
+        labels: ['英語', '国語', '日本史', 'その他'],
+        datasets: [{
+          data: [0, 0, 0, 0],
+          backgroundColor: ['#d47a82', '#d4a373', '#81b29a', '#8d99ae'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // 2. 国語グループ内訳 円グラフ
+    const ctxPie2 = document.getElementById('japanesePieChart').getContext('2d');
+    japanesePieChart = new Chart(ctxPie2, {
+      type: 'doughnut',
+      data: {
+        labels: ['現代文', '古文', '漢文'],
+        datasets: [{
+          data: [0, 0, 0],
+          backgroundColor: ['#e07a5f', '#f4a261', '#e9c46a'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // 3. 積み上げ推移 棒グラフ
+    const ctxBar = document.getElementById('stackedBarChart').getContext('2d');
+    stackedBarChart = new Chart(ctxBar, {
       type: 'bar',
       data: {
         labels: [],
-        datasets: [{ label: '獲得pt', data: [], backgroundColor: '#c5a059' }]
+        datasets: [
+          { label: '英語', data: [], backgroundColor: '#d47a82' },
+          { label: '国語', data: [], backgroundColor: '#d4a373' },
+          { label: '日本史', data: [], backgroundColor: '#81b29a' },
+          { label: 'その他', data: [], backgroundColor: '#8d99ae' }
+        ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { ticks: { color: '#d1c4c6' }, grid: { display: false } },
-          y: { ticks: { color: '#d1c4c6' }, beginAtZero: true }
+          x: { stacked: true, ticks: { color: '#d1c4c6' }, grid: { display: false } },
+          y: { stacked: true, ticks: { color: '#d1c4c6' }, beginAtZero: true }
         },
         plugins: { legend: { display: false } }
       }
     });
   }
 
-  function updateChart() {
-    const dates = [...new Set(studyLogs.map(l => l.date))].sort();
-    const totals = dates.map(d => studyLogs.filter(l => l.date === d).length);
+  function updateCharts() {
+    const date = document.getElementById('task-date').value;
+    const todayLogs = studyLogs.filter(l => l.date === date);
 
-    barChart.data.labels = dates.map(d => d.substring(5));
-    barChart.data.datasets[0].data = totals;
-    barChart.update();
+    // 科目別カウント
+    const engCount = todayLogs.filter(l => l.subject === '英語').length;
+    const japCount = todayLogs.filter(l => l.subject === '国語').length;
+    const hisCount = todayLogs.filter(l => l.subject === '日本史').length;
+    const othCount = todayLogs.filter(l => l.subject === 'その他').length;
+
+    subjectPieChart.data.datasets[0].data = [engCount, japCount, hisCount, othCount];
+    subjectPieChart.update();
+
+    // 国語内訳カウント
+    const genCount = todayLogs.filter(l => l.subject === '国語' && l.subSubject === '現代文').length;
+    const kobCount = todayLogs.filter(l => l.subject === '国語' && l.subSubject === '古文').length;
+    const kanCount = todayLogs.filter(l => l.subject === '国語' && l.subSubject === '漢文').length;
+
+    japanesePieChart.data.datasets[0].data = [genCount, kobCount, kanCount];
+    japanesePieChart.update();
+
+    // 積み上げ推移グラフ更新
+    const dates = [...new Set(studyLogs.map(l => l.date))].sort();
+    
+    stackedBarChart.data.labels = dates.map(d => d.substring(5));
+    stackedBarChart.data.datasets[0].data = dates.map(d => studyLogs.filter(l => l.date === d && l.subject === '英語').length);
+    stackedBarChart.data.datasets[1].data = dates.map(d => studyLogs.filter(l => l.date === d && l.subject === '国語').length);
+    stackedBarChart.data.datasets[2].data = dates.map(d => studyLogs.filter(l => l.date === d && l.subject === '日本史').length);
+    stackedBarChart.data.datasets[3].data = dates.map(d => studyLogs.filter(l => l.date === d && l.subject === 'その他').length);
+    stackedBarChart.update();
   }
 
   function saveKey() {
@@ -762,12 +939,12 @@
   }
 
   function clearAllData() {
-    if (confirm('すべての履歴を初期化しますか？')) {
+    if (confirm('すべてのデータを完全に消去しますか？')) {
       studyLogs = [];
       renderLogs();
       updateProgress();
       renderBadges();
-      alert('初期化が完了しました。');
+      alert('初期化されました。');
     }
   }
 
