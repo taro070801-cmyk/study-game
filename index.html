@@ -2,439 +2,355 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>早稲田攻略 戦略ナビゲーター</title>
 
-  <!-- アイコン設定 -->
-  <link rel="icon" href="Gemini_Generated_Image_8rgt0y8rgt0y8rgt.jpeg" type="image/jpeg">
-  <link rel="apple-touch-icon" href="Gemini_Generated_Image_8rgt0y8rgt0y8rgt.jpeg">
+  <!-- iOS PWA・アプリ表示設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- 紙吹雪アニメーション用ライブラリ -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <!-- Firebase 読み込み ＆ ログイン機能 -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCh9gzYEt4TQLQYdVHgbTQ64F6veOWNMWU",
-      authDomain: "study-game-3370b.firebaseapp.com",
-      projectId: "study-game-3370b",
-      storageBucket: "study-game-3370b.firebasestorage.app",
-      messagingSenderId: "1022761221608",
-      appId: "1:1022761221608:web:6f939b78d2c9754284b85d",
-      measurementId: "G-VBFT1RN23E"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    window.loginWithGoogle = function() {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          alert(`ログインしました: ${result.user.displayName}さん`);
-        })
-        .catch((error) => {
-          console.error("ログインエラー:", error);
-        });
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("ログイン中ユーザー:", user.displayName, user.email);
-      } else {
-        console.log("未ログイン状態");
-      }
-    });
-  </script>
 
   <style>
     :root {
-      /* 早稲田カラー（臙脂・金・シックなダークトーン） */
-      --waseda-crimson: #7e1081; /* 臙脂色 */
-      --waseda-crimson-dark: #580309;
+      --waseda-crimson: #660011;
+      --waseda-crimson-light: #8b0018;
+      --waseda-crimson-dark: #3f000a;
       --waseda-gold: #c5a059;
       --waseda-gold-light: #e8d3a7;
-      --bg-color: #f4f1ea;
-      --card-bg: #ffffff;
-      --text-main: #2b2b2b;
-      --text-sub: #666666;
-      --border-color: #dcd6cd;
+      
+      --bg-color: #3f000a;
+      --card-bg-solid: #50000d;
+      --text-main: #ffffff;
+      --text-sub: #d1c4c6;
+      --border-color: rgba(197, 160, 89, 0.3);
 
-      --subject-english: #e8bdc2;
-      --subject-japanese: #ebd8bd;
-      --subject-history: #c2d8c0;
-      --subject-other: #d0d3d4;
-
-      --subject-english-completed: #800020;
-      --subject-japanese-completed: #b87333;
-      --subject-history-completed: #2d5a27;
-      --subject-other-completed: #4a5568;
+      --subject-english: #d47a82;
+      --subject-japanese: #d4a373;
+      --subject-history: #81b29a;
+      --subject-other: #a8dadc;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
 
     body {
-      font-family: "Georgia", "Yu Mincho", "游明朝", -apple-system, serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
-      padding: 20px;
-      line-height: 1.6;
+      line-height: 1.5;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: calc(75px + env(safe-area-inset-bottom));
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 600px;
       margin: 0 auto;
+      padding: 16px;
     }
 
-    /* ヘッダー：荘厳な高尚デザイン */
     header {
-      background: linear-gradient(135deg, var(--waseda-crimson-dark) 0%, var(--waseda-crimson) 100%);
-      color: #ffffff;
-      padding: 24px;
-      border-radius: 12px;
-      border-bottom: 4px solid var(--waseda-gold);
-      margin-bottom: 20px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      margin-bottom: 12px;
     }
 
     header h1 {
-      font-size: 1.5rem;
-      letter-spacing: 0.08em;
-      font-weight: normal;
-      color: #ffffff;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--waseda-gold-light);
+      font-family: "Georgia", serif;
     }
 
-    .header-btn {
-      background: rgba(255,255,255,0.15);
-      color: #ffffff;
-      border: 1px solid var(--waseda-gold-light);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background 0.3s;
+    .header-sub {
+      font-size: 0.65rem;
+      color: var(--text-sub);
+      letter-spacing: 0.1em;
     }
-    .header-btn:hover { background: rgba(255,255,255,0.3); }
 
-    .api-key-box input {
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
+    /* 🧠 【好奇心刺激】トリビアバナー */
+    .trivia-box {
+      background: rgba(197, 160, 89, 0.12);
+      border: 1px dashed var(--waseda-gold);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
       font-size: 0.8rem;
-      background: rgba(255,255,255,0.9);
-    }
-
-    /* タブメニュー */
-    .tab-menu {
+      color: var(--waseda-gold-light);
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid var(--border-color);
-      padding-bottom: 8px;
+      align-items: center;
     }
 
-    .tab-btn {
-      flex: 1;
-      padding: 12px;
+    .trivia-icon { font-size: 1.2rem; }
+
+    /* ボトムナビゲーション */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(60px + env(safe-area-inset-bottom));
+      background: rgba(40, 0, 6, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      padding-top: 8px;
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       background: none;
       border: none;
-      font-size: 0.95rem;
-      font-weight: bold;
       color: var(--text-sub);
+      font-size: 0.68rem;
+      gap: 2px;
       cursor: pointer;
-      transition: all 0.3s;
-      border-radius: 8px 8px 0 0;
+      width: 25%;
     }
 
-    .tab-btn.active {
-      color: var(--waseda-crimson);
-      border-bottom: 3px solid var(--waseda-crimson);
-      background: #ffffff;
+    .nav-item.active {
+      color: var(--waseda-gold);
+      font-weight: bold;
     }
+
+    .nav-icon { font-size: 1.2rem; }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
     .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 24px;
+      background: var(--card-bg-solid);
+      border-radius: 16px;
+      padding: 18px;
       border: 1px solid var(--border-color);
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
     .card h2 {
-      font-size: 1.15rem;
-      color: var(--waseda-crimson);
-      margin-bottom: 15px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--waseda-gold-light);
+      font-size: 1rem;
+      color: var(--waseda-gold);
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-weight: 600;
     }
 
-    /* --- メイン：pt表示（主役） --- */
-    .total-pt-hero {
+    /* 🧠 ドパミン報酬系エリア */
+    .hero-pt-box {
       text-align: center;
-      padding: 15px 0 25px 0;
-      background: linear-gradient(180deg, #fdfbf7 0%, #ffffff 100%);
+      padding: 16px 10px;
+      background: radial-gradient(circle, rgba(197, 160, 89, 0.15) 0%, rgba(0,0,0,0) 70%);
+      border-radius: 20px;
+      position: relative;
+    }
+
+    .rank-badge {
+      font-size: 0.75rem;
+      background: linear-gradient(90deg, var(--waseda-gold) 0%, #a37c3f 100%);
+      color: #1a0004;
+      padding: 2px 10px;
       border-radius: 10px;
-      border: 1px dashed var(--waseda-gold);
-      margin-bottom: 20px;
-    }
-
-    .total-pt-hero .label {
-      font-size: 0.9rem;
-      color: var(--text-sub);
-      letter-spacing: 0.05em;
-    }
-
-    .total-pt-hero .num {
-      font-size: 3.5rem;
       font-weight: bold;
-      color: var(--waseda-crimson);
-      line-height: 1;
-      margin: 8px 0;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    .hero-pt-counter {
+      font-size: 4rem;
+      font-weight: 900;
+      color: #ffffff;
       font-family: 'Times New Roman', serif;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(197, 160, 89, 0.5);
+      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+      display: inline-block;
     }
 
-    /* アニメーション用クラス */
-    .num-bounce {
-      transform: scale(1.3);
-      color: #d4af37;
+    .pt-pop {
+      transform: scale(1.35);
+      color: var(--waseda-gold);
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
     }
 
-    .subject-goal-grid {
+    /* 🧠 【収集欲求】バッジ一覧 */
+    .badge-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .badge-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 4px;
+      text-align: center;
+      opacity: 0.35;
+      filter: grayscale(100%);
+      transition: all 0.3s ease;
+    }
+
+    .badge-item.unlocked {
+      opacity: 1;
+      filter: grayscale(0%);
+      background: rgba(197, 160, 89, 0.15);
+      border-color: var(--waseda-gold);
+      box-shadow: 0 0 10px rgba(197, 160, 89, 0.3);
+    }
+
+    .badge-icon { font-size: 1.6rem; display: block; margin-bottom: 2px; }
+    .badge-name { font-size: 0.65rem; color: var(--waseda-gold-light); font-weight: bold; }
+    .badge-req { font-size: 0.55rem; color: var(--text-sub); }
+
+    /* 進捗メーター */
+    .goal-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    @media (max-width: 768px) {
-      .subject-goal-grid { grid-template-columns: 1fr; }
+      gap: 10px;
     }
 
     .goal-card {
-      background: #faf8f5;
-      padding: 15px;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .goal-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 0.95rem;
-    }
-
-    .goal-header .pt-counter {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--waseda-crimson);
-      font-family: 'Times New Roman', serif;
-    }
-
-    .goal-input-inline {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
       font-size: 0.75rem;
-      color: var(--text-sub);
-    }
-
-    .goal-input-inline input {
-      width: 55px;
-      padding: 2px 5px;
-      font-size: 0.8rem;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
-      text-align: center;
+      margin-bottom: 4px;
     }
 
     .progress-bar-bg {
-      width: 100%;
-      height: 14px;
-      background-color: #e6e1da;
-      border-radius: 10px;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
       overflow: hidden;
     }
 
     .progress-bar-fill {
       height: 100%;
       width: 0%;
-      border-radius: 10px;
-      transition: width 0.4s ease-out, background-color 0.4s ease;
+      border-radius: 4px;
+      transition: width 0.4s ease;
     }
 
-    .fill-english { background-color: var(--subject-english); }
-    .fill-japanese { background-color: var(--subject-japanese); }
-    .fill-history { background-color: var(--subject-history); }
-    .fill-other { background-color: var(--subject-other); }
+    .fill-english { background: var(--subject-english); }
+    .fill-japanese { background: var(--subject-japanese); }
+    .fill-history { background: var(--subject-history); }
+    .fill-other { background: var(--subject-other); }
 
-    .fill-english.completed { background-color: var(--subject-english-completed); }
-    .fill-japanese.completed { background-color: var(--subject-japanese-completed); }
-    .fill-history.completed { background-color: var(--subject-history-completed); }
-    .fill-other.completed { background-color: var(--subject-other-completed); }
-
-    /* --- 項目選択（控えめ・シンプルUI） --- */
-    .compact-form-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 12px;
-      background: #faf8f5;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-
-    .compact-form-row select, 
-    .compact-form-row input[type="date"],
-    .compact-form-row input[type="text"] {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      font-size: 0.85rem;
-      background: #ffffff;
-      color: var(--text-main);
-    }
-
-    .date-picker-box {
+    /* 入力フォーム */
+    .date-row {
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 0.85rem;
-      color: var(--text-sub);
+      justify-content: space-between;
+      margin-bottom: 10px;
+      background: rgba(0,0,0,0.2);
+      padding: 8px 12px;
+      border-radius: 10px;
     }
 
-    /* 達成感を醸し出すワンポチ大ボタン */
-    button.quick-pt-btn {
-      width: 100%;
-      padding: 18px;
-      background: linear-gradient(135deg, var(--waseda-crimson) 0%, var(--waseda-crimson-dark) 100%);
-      color: #ffffff;
-      border: 2px solid var(--waseda-gold);
-      border-radius: 10px;
-      font-size: 1.2rem;
+    .date-row input[type="date"] {
+      background: transparent;
+      border: none;
+      color: var(--waseda-gold-light);
+      font-size: 0.85rem;
       font-weight: bold;
+    }
+
+    .selector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 0.85rem;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--waseda-gold) 0%, #a37c3f 100%);
+      color: #1a0004;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: 800;
       letter-spacing: 0.05em;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(126, 16, 129, 0.3);
-      transition: all 0.15s ease;
+      box-shadow: 0 6px 20px rgba(197, 160, 89, 0.4);
+      transition: all 0.1s ease;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
-    button.quick-pt-btn:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
+    .action-btn:active {
+      transform: scale(0.96);
     }
 
-    button.quick-pt-btn:active {
-      transform: translateY(2px) scale(0.99);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    /* タスクリスト */
-    .task-list { list-style: none; margin-top: 10px; }
-    .task-item {
-      background: #ffffff;
-      padding: 10px 14px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
+    .log-item {
+      background: rgba(0,0,0,0.2);
+      padding: 10px 12px;
+      border-radius: 10px;
       margin-bottom: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+      border-left: 3px solid var(--waseda-gold);
     }
-
-    .badge {
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: bold;
-    }
-    .bg-english { background-color: var(--subject-english); }
-    .bg-japanese { background-color: var(--subject-japanese); }
-    .bg-history { background-color: var(--subject-history); }
-    .bg-other { background-color: var(--subject-other); }
 
     .delete-btn {
       background: none;
       border: none;
-      color: #999;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
-    .delete-btn:hover { color: #c00; }
-
-    /* 設定エリア */
-    .setting-section {
-      background: #faf8f5;
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      margin-bottom: 15px;
+      color: #ff6b6b;
+      font-size: 0.85rem;
+      padding: 4px;
     }
 
-    .add-inline-form { display: flex; gap: 8px; margin-top: 8px; }
-    .add-inline-form input { flex: 1; padding: 6px; }
-    .add-inline-form button {
-      padding: 6px 12px;
-      background: var(--waseda-crimson);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .item-tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .item-tag {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-    }
-    .item-tag span.del-tag { cursor: pointer; color: #a00; margin-left: 4px; }
-
-    .charts-grid-3col {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 15px;
-    }
-    @media (max-width: 850px) { .charts-grid-3col { grid-template-columns: 1fr; } }
-    .chart-container { position: relative; height: 200px; width: 100%; }
-
-    .report-output {
-      background: #faf8f5;
-      border-left: 4px solid var(--waseda-crimson);
-      padding: 15px;
-      border-radius: 0 8px 8px 0;
-      white-space: pre-wrap;
-      font-size: 0.9rem;
-      min-height: 120px;
+    .chart-box {
+      position: relative;
+      height: 180px;
+      width: 100%;
     }
   </style>
 </head>
@@ -443,199 +359,176 @@
 <div class="container">
   <header>
     <div>
-      <h1>早稲田攻略 戦略ナビゲーター</h1>
-      <p style="font-size: 0.75rem; color: var(--waseda-gold-light); margin-top:2px;">Waseda Victory Strategy Navigator</p>
+      <h1>WASEDA NAVI</h1>
+      <div class="header-sub">早稲田大学合格 戦略統括ポータル</div>
     </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <button class="header-btn" onclick="loginWithGoogle()">Google連携</button>
-      <div class="api-key-box">
-        <input type="password" id="api-key" placeholder="Gemini API Key" onchange="saveData()">
-      </div>
+    <div style="font-size: 0.75rem; color: var(--waseda-gold);">
+      <span id="header-date"></span>
     </div>
   </header>
 
-  <div class="tab-menu">
-    <button class="tab-btn active" onclick="switchTab('task-page')">学習記録・pt獲得</button>
-    <button class="tab-btn" onclick="switchTab('partner-page')">分析・AIアドバイス</button>
-    <button class="tab-btn" onclick="switchTab('setting-page')">教材・マスタ設定</button>
+  <!-- 🧠 好奇心を刺激する雑学・知識の隙間バナー -->
+  <div class="trivia-box">
+    <span class="trivia-icon">💡</span>
+    <div id="trivia-text">早稲田の入試雑学をロード中...</div>
   </div>
 
-  <!-- PAGE 1: タスク管理 & 記録 -->
-  <div id="task-page" class="tab-content active">
+  <!-- TAB 1: 記録 & ドパミン -->
+  <div id="tab-study" class="tab-content active">
     
-    <!-- 主役：pt表示ヒーローエリア -->
     <div class="card">
-      <div class="total-pt-hero">
-        <div class="label">本日の獲得ポイント</div>
-        <div class="num" id="hero-total-pt">0 <span style="font-size:1.5rem">pt</span></div>
-        <div style="font-size:0.8rem; color:var(--text-sub);" id="hero-date-display">2026/08/28</div>
+      <div class="hero-pt-box">
+        <div class="rank-badge" id="user-rank">RANK: 早稲田の挑戦者</div><br>
+        <div class="hero-pt-counter" id="hero-pt">0</div>
+        <div style="font-size: 1rem; color: var(--waseda-gold); display: inline;">pt</div>
       </div>
 
-      <h2>本日の目標達成度</h2>
-      <div class="subject-goal-grid">
+      <!-- 進捗ゲージ -->
+      <div class="goal-grid" style="margin-top: 12px;">
         <div class="goal-card">
-          <div class="goal-header">
-            <span>英語</span>
-            <span class="pt-counter"><span id="val-english">0</span> / <span id="max-display-english">5</span> pt</span>
-          </div>
-          <div class="goal-input-inline">
-            <span>目標設定</span>
-            <input type="number" id="goal-english" value="5" onchange="updateGoalProgress(); saveData();">
-          </div>
+          <div class="goal-header"><span>英語</span><span><b id="val-english">0</b>/5pt</span></div>
           <div class="progress-bar-bg"><div id="bar-english" class="progress-bar-fill fill-english"></div></div>
         </div>
-
         <div class="goal-card">
-          <div class="goal-header">
-            <span>国語</span>
-            <span class="pt-counter"><span id="val-japanese">0</span> / <span id="max-display-japanese">3</span> pt</span>
-          </div>
-          <div class="goal-input-inline">
-            <span>目標設定</span>
-            <input type="number" id="goal-japanese" value="3" onchange="updateGoalProgress(); saveData();">
-          </div>
+          <div class="goal-header"><span>国語</span><span><b id="val-japanese">0</b>/3pt</span></div>
           <div class="progress-bar-bg"><div id="bar-japanese" class="progress-bar-fill fill-japanese"></div></div>
         </div>
-
         <div class="goal-card">
-          <div class="goal-header">
-            <span>日本史</span>
-            <span class="pt-counter"><span id="val-history">0</span> / <span id="max-display-history">4</span> pt</span>
-          </div>
-          <div class="goal-input-inline">
-            <span>目標設定</span>
-            <input type="number" id="goal-history" value="4" onchange="updateGoalProgress(); saveData();">
-          </div>
+          <div class="goal-header"><span>日本史</span><span><b id="val-history">0</b>/4pt</span></div>
           <div class="progress-bar-bg"><div id="bar-history" class="progress-bar-fill fill-history"></div></div>
         </div>
-
         <div class="goal-card">
-          <div class="goal-header">
-            <span>その他</span>
-            <span class="pt-counter"><span id="val-other">0</span> / <span id="max-display-other">2</span> pt</span>
-          </div>
-          <div class="goal-input-inline">
-            <span>目標設定</span>
-            <input type="number" id="goal-other" value="2" onchange="updateGoalProgress(); saveData();">
-          </div>
+          <div class="goal-header"><span>その他</span><span><b id="val-other">0</b>/2pt</span></div>
           <div class="progress-bar-bg"><div id="bar-other" class="progress-bar-fill fill-other"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- 控えめな選択フォーム ＆ 主役ワンポチボタン -->
+    <!-- 爆速入力フォーム -->
     <div class="card">
-      <h2>タスク完了の記録</h2>
-      
-      <!-- 日付変更 ＆ 控えめな項目選択UI -->
-      <div class="compact-form-row">
-        <div class="date-picker-box">
-          <label for="task-date">日付:</label>
-          <input type="date" id="task-date" onchange="onDateChange()">
-        </div>
-        <select id="task-subject" onchange="updateSubSubjectOptions(); updateTaskSelectOptions();">
+      <h2>学習完了の記録</h2>
+      <div class="date-row">
+        <span style="font-size: 0.8rem; color: var(--text-sub);">記録日:</span>
+        <input type="date" id="task-date" onchange="onDateChange()">
+      </div>
+
+      <div class="selector-grid">
+        <select id="task-subject" onchange="updateSubOptions(); updateTaskOptions();">
           <option value="英語">英語</option>
           <option value="国語">国語</option>
           <option value="日本史">日本史</option>
           <option value="その他">その他</option>
         </select>
-        <select id="task-sub-subject"></select>
-        <select id="task-select" onchange="handleTaskSelectChange()"></select>
-        <input type="text" id="task-name-custom" placeholder="新規教材名" style="display:none; width:130px;">
+        <select id="task-sub"></select>
       </div>
 
-      <!-- 爆速ワンポチボタン -->
-      <button type="button" class="quick-pt-btn" onclick="addQuickPoint()">
-        <span>⚔️</span> 1タスク達成！（＋1 pt 獲得）
+      <div style="margin-bottom: 12px;">
+        <select id="task-name-select" onchange="handleTaskSelectChange()"></select>
+        <input type="text" id="task-name-custom" placeholder="教材名を入力" style="display:none; margin-top:8px;">
+      </div>
+
+      <button type="button" class="action-btn" onclick="addPointWithDopamine()">
+        <span>⚔️</span> 1タスク完了 (+1pt)
       </button>
     </div>
 
     <div class="card">
-      <h2>選択中の日付の学習ログ</h2>
-      <ul id="log-list" class="task-list"></ul>
+      <h2>本日の実行ログ</h2>
+      <div id="log-list"></div>
     </div>
   </div>
 
-  <!-- PAGE 2: AIパートナー & 分析 -->
-  <div id="partner-page" class="tab-content">
+  <!-- TAB 2: 🧠 収集本能（コレクトバッジ） -->
+  <div id="tab-badges" class="tab-content">
+    <div class="card">
+      <h2>早稲田栄誉バッジ集</h2>
+      <p style="font-size: 0.75rem; color: var(--text-sub); margin-bottom: 10px;">ポイントを積み上げて伝統の称号をコンプリートせよ。</p>
+      
+      <div class="badge-grid" id="badge-container"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: 分析・AI -->
+  <div id="tab-analytics" class="tab-content">
     <div class="card">
       <h2>学習積み上げ推移</h2>
-      <div class="chart-container" style="height:240px;">
+      <div class="chart-box">
         <canvas id="barChart"></canvas>
       </div>
     </div>
 
-    <div class="charts-grid-3col">
-      <div class="card">
-        <h2>全体バランス</h2>
-        <div class="chart-container"><canvas id="pieChartMain"></canvas></div>
-      </div>
-      <div class="card">
-        <h2>英語の内訳</h2>
-        <div class="chart-container"><canvas id="pieChartEnglish"></canvas></div>
-      </div>
-      <div class="card">
-        <h2>国語の内訳</h2>
-        <div class="chart-container"><canvas id="pieChartJapanese"></canvas></div>
-      </div>
-    </div>
-
     <div class="card">
-      <h2>早稲田攻略 AIアドバイザー</h2>
-      <label style="font-size:0.85rem; color:var(--text-sub);">振り返り・相談・つまずき</label>
-      <textarea id="user-reflection" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); font-size:0.9rem;" placeholder="例: 英語長文の速度が上がらない。"></textarea>
-      <button type="button" id="ai-btn" onclick="requestAiAnalysis()" style="margin-top:10px; width:100%; padding:10px; background:var(--waseda-crimson); color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">AIアドバイスを生成</button>
-      <h3 style="font-size:0.9rem; color:var(--waseda-crimson); margin-top:15px; margin-bottom:5px;">AIレポート分析</h3>
-      <div id="ai-report-output" class="report-output">Gemini API Keyを設定して分析を実行してください。</div>
+      <h2>軍師AIアドバイザー</h2>
+      <textarea id="user-reflection" style="width:100%; height:70px; margin-bottom:10px;" placeholder="今日の感覚や疑問点を入力..."></textarea>
+      <button type="button" class="action-btn" style="font-size:0.85rem; padding:12px;" onclick="requestAiAnalysis()">分析を実行</button>
+      <div id="ai-output" style="margin-top:12px; font-size:0.8rem; color:var(--text-sub); white-space:pre-wrap;"></div>
     </div>
   </div>
 
-  <!-- PAGE 3: 項目・教材マスタ編集 -->
-  <div id="setting-page" class="tab-content">
+  <!-- TAB 4: 設定 -->
+  <div id="tab-settings" class="tab-content">
     <div class="card">
-      <h2>教材・分類の編集</h2>
-      
-      <div class="setting-section">
-        <h3>各科目の分類（内訳）設定</h3>
-        <select id="setting-subject-sub" onchange="renderSubSubjectSetting()">
-          <option value="英語">英語</option>
-          <option value="国語">国語</option>
-          <option value="日本史">日本史</option>
-          <option value="その他">その他</option>
-        </select>
-        <div class="add-inline-form">
-          <input type="text" id="new-sub-input" placeholder="新しい分類 (例: 長文演習)">
-          <button type="button" onclick="addSubSubjectSetting()">追加</button>
-        </div>
-        <div id="sub-subject-tags" class="item-tag-list"></div>
-      </div>
-
-      <div class="setting-section">
-        <h3>登録済み教材リスト</h3>
-        <select id="setting-subject-task" onchange="renderTaskSetting()">
-          <option value="英語">英語</option>
-          <option value="国語">国語</option>
-          <option value="日本史">日本史</option>
-          <option value="その他">その他</option>
-        </select>
-        <div class="add-inline-form">
-          <input type="text" id="new-task-input" placeholder="新しい教材名">
-          <button type="button" onclick="addTaskSetting()">追加</button>
-        </div>
-        <div id="task-tags" class="item-tag-list"></div>
+      <h2>設定</h2>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <label style="font-size:0.8rem;">Gemini API Key</label>
+        <input type="password" id="api-key" placeholder="AIキーを入力" onchange="saveKey()">
+        <button type="button" onclick="clearAllData()" style="background:#8b0000; color:white; border:none; padding:12px; border-radius:10px; font-weight:bold; margin-top:20px;">
+          ⚠️ 履歴を完全削除してやり直す
+        </button>
       </div>
     </div>
   </div>
+
 </div>
+
+<!-- ボトムナビ -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchTab('tab-study', this)">
+    <span class="nav-icon">⚔️</span>
+    <span>記録</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('tab-badges', this)">
+    <span class="nav-icon">🏆</span>
+    <span>バッジ</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('tab-analytics', this)">
+    <span class="nav-icon">📊</span>
+    <span>分析</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('tab-settings', this)">
+    <span class="nav-icon">⚙️</span>
+    <span>設定</span>
+  </button>
+</nav>
 
 <script>
   let studyLogs = [];
+  
+  const trivias = [
+    "【日本史】早稲田創設者の大隈重信は、実は生涯で一度も自分の著書を書いたことがない（全て口述筆記）。",
+    "【早稲田トリビア】大隈講堂の時計塔は「人生100年説」にちなんで100尺（約30m）の高さで作られた。",
+    "【英語】早稲田の長文は「背景知識」があると爆速で読める。政治・経済のトレンドは必修概念！",
+    "【脳科学】タスクを1つ終えるたびにポイントを押すと、脳内でドパミンが分泌され次のやる気を誘発する。"
+  ];
+
+  const badgesMaster = [
+    { id: 1, name: "第一歩", icon: "🌱", req: 1 },
+    { id: 2, name: "早稲田の灯", icon: "🏮", req: 10 },
+    { id: 3, name: "大隈講堂", icon: "🏛️", req: 25 },
+    { id: 4, name: "萬朝報", icon: "📰", req: 50 },
+    { id: 5, name: "角帽の志", icon: "🎓", req: 80 },
+    { id: 6, name: "臙脂の誇り", icon: "🚩", req: 120 },
+    { id: 7, name: "大隈重信像", icon: "🗿", req: 170 },
+    { id: 8, name: "早稲田王", icon: "👑", req: 230 }
+  ];
+
   let savedTasks = {
     '英語': ['単熟語EX準1級', 'ポラリス1', '肘井の読解'],
     '国語': ['開発講座', '古文単語315', '岡本古文文法'],
     '日本史': ['東進一問一答', '実況中継1'],
     'その他': ['小論文演習']
   };
+  
   let savedSubSubjects = {
     '英語': ['単語', '文法', '解釈', '長文'],
     '国語': ['現代文', '古文', '漢文'],
@@ -643,501 +536,242 @@
     'その他': ['その他']
   };
 
-  let barChart, pieChartMain, pieChartEnglish, pieChartJapanese;
+  let barChart = null;
 
-  // 今日の日付 (YYYY-MM-DD)
   function getTodayISO() {
     const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
-  function formatDateDisplay(isoStr) {
-    const parts = isoStr.split('-');
-    return `${parts[0]}/${parts[1]}/${parts[2]}`;
-  }
-
-  function saveData() {
-    localStorage.setItem('waseda_study_logs', JSON.stringify(studyLogs));
-    localStorage.setItem('waseda_saved_tasks', JSON.stringify(savedTasks));
-    localStorage.setItem('waseda_sub_subjects', JSON.stringify(savedSubSubjects));
-    localStorage.setItem('waseda_api_key', document.getElementById('api-key').value);
+  function init() {
+    localStorage.removeItem('waseda_study_logs'); // 完全リセット保証
     
-    const goals = {
-      english: document.getElementById('goal-english').value,
-      japanese: document.getElementById('goal-japanese').value,
-      history: document.getElementById('goal-history').value,
-      other: document.getElementById('goal-other').value
-    };
-    localStorage.setItem('waseda_goals', JSON.stringify(goals));
-  }
-
-  function loadData() {
-    const logs = localStorage.getItem('waseda_study_logs');
-    if (logs) studyLogs = JSON.parse(logs);
-
-    const tasks = localStorage.getItem('waseda_saved_tasks');
-    if (tasks) savedTasks = JSON.parse(tasks);
-
-    const subs = localStorage.getItem('waseda_sub_subjects');
-    if (subs) savedSubSubjects = JSON.parse(subs);
-
-    const key = localStorage.getItem('waseda_api_key');
-    if (key) document.getElementById('api-key').value = key;
-
-    const goals = localStorage.getItem('waseda_goals');
-    if (goals) {
-      const g = JSON.parse(goals);
-      if (g.english) document.getElementById('goal-english').value = g.english;
-      if (g.japanese) document.getElementById('goal-japanese').value = g.japanese;
-      if (g.history) document.getElementById('goal-history').value = g.history;
-      if (g.other) document.getElementById('goal-other').value = g.other;
-    }
-
     document.getElementById('task-date').value = getTodayISO();
+    document.getElementById('header-date').innerText = getTodayISO().replace(/-/g, '/');
+    
+    showRandomTrivia();
+    updateSubOptions();
+    updateTaskOptions();
+    renderLogs();
+    updateProgress();
+    renderBadges();
+    initChart();
   }
 
-  function switchTab(tabId) {
+  function showRandomTrivia() {
+    const idx = Math.floor(Math.random() * trivias.length);
+    document.getElementById('trivia-text').innerText = trivias[idx];
+  }
+
+  function switchTab(tabId, btn) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     
     document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
+    btn.classList.add('active');
 
-    if (tabId === 'partner-page') {
-      updateCharts();
-    } else if (tabId === 'setting-page') {
-      renderSubSubjectSetting();
-      renderTaskSetting();
-    }
+    if (tabId === 'tab-analytics') updateChart();
+    if (tabId === 'tab-badges') renderBadges();
   }
 
   function onDateChange() {
-    renderLogList();
-    updateGoalProgress();
+    renderLogs();
+    updateProgress();
   }
 
-  function updateSubSubjectOptions() {
+  function updateSubOptions() {
     const subject = document.getElementById('task-subject').value;
-    const subSelect = document.getElementById('task-sub-subject');
+    const subSelect = document.getElementById('task-sub');
     subSelect.innerHTML = '';
-
-    const options = savedSubSubjects[subject] || ['その他'];
-    options.forEach(opt => {
-      const el = document.createElement('option');
-      el.value = opt;
-      el.innerText = opt;
-      subSelect.appendChild(el);
+    (savedSubSubjects[subject] || ['その他']).forEach(s => {
+      subSelect.innerHTML += `<option value="${s}">${s}</option>`;
     });
   }
 
-  function updateTaskSelectOptions() {
+  function updateTaskOptions() {
     const subject = document.getElementById('task-subject').value;
-    const select = document.getElementById('task-select');
-    const customInput = document.getElementById('task-name-custom');
-    
+    const select = document.getElementById('task-name-select');
     select.innerHTML = '';
-    const list = savedTasks[subject] || [];
 
-    list.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item;
-      opt.innerText = item;
-      select.appendChild(opt);
+    (savedTasks[subject] || []).forEach(t => {
+      select.innerHTML += `<option value="${t}">${t}</option>`;
     });
-
-    const newOpt = document.createElement('option');
-    newOpt.value = '__NEW__';
-    newOpt.innerText = '＋ 新規教材';
-    select.appendChild(newOpt);
-
-    if (list.length === 0) {
-      select.value = '__NEW__';
-      customInput.style.display = 'inline-block';
-    } else {
-      customInput.style.display = 'none';
-    }
+    select.innerHTML += `<option value="__NEW__">＋ 新規教材を入力</option>`;
+    
+    handleTaskSelectChange();
   }
 
   function handleTaskSelectChange() {
-    const select = document.getElementById('task-select');
+    const select = document.getElementById('task-name-select');
     const customInput = document.getElementById('task-name-custom');
-    if (select.value === '__NEW__') {
-      customInput.style.display = 'inline-block';
-      customInput.focus();
-    } else {
-      customInput.style.display = 'none';
-    }
+    customInput.style.display = (select.value === '__NEW__') ? 'block' : 'none';
   }
 
-  /* 🔥 ワンポチ加算 ＆ 達成感アニメーション */
-  function addQuickPoint() {
-    const selectedDate = document.getElementById('task-date').value;
-    if (!selectedDate) return alert('日付を選択してください');
-
+  function addPointWithDopamine() {
+    const date = document.getElementById('task-date').value;
     const subject = document.getElementById('task-subject').value;
-    const subSubject = document.getElementById('task-sub-subject').value;
+    const sub = document.getElementById('task-sub').value;
     
-    const taskSelect = document.getElementById('task-select');
-    const customTaskInput = document.getElementById('task-name-custom');
-    let taskName = '';
-
-    if (taskSelect.value === '__NEW__') {
-      taskName = customTaskInput.value.trim();
-      if (!taskName) return alert('教材名を入力してください。');
-      if (!savedTasks[subject]) savedTasks[subject] = [];
-      if (!savedTasks[subject].includes(taskName)) savedTasks[subject].push(taskName);
-    } else {
-      taskName = taskSelect.value;
-    }
+    const select = document.getElementById('task-name-select');
+    const customInput = document.getElementById('task-name-custom');
+    
+    let taskName = select.value === '__NEW__' ? customInput.value.trim() : select.value;
+    if (!taskName) return alert('教材名を入力してください');
 
     studyLogs.push({
       id: Date.now(),
-      date: selectedDate, // YYYY-MM-DD
+      date,
       subject,
-      subSubject,
+      subSubject: sub,
       name: taskName,
-      amount: 1,
-      unit: 'pt'
+      amount: 1
     });
 
-    saveData();
-    renderLogList();
-    updateGoalProgress();
-    updateTaskSelectOptions();
-    customTaskInput.value = '';
+    renderLogs();
+    updateProgress();
+    renderBadges();
+    showRandomTrivia();
 
-    // --- 達成感演出（数字バウンス & 紙吹雪） ---
-    triggerPtAnimation();
-  }
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate([20, 30, 20]);
+    }
 
-  function triggerPtAnimation() {
-    // 1. 数字跳ね演出
-    const numEl = document.getElementById('hero-total-pt');
-    numEl.classList.add('num-bounce');
-    setTimeout(() => numEl.classList.remove('num-bounce'), 300);
+    const counter = document.getElementById('hero-pt');
+    counter.classList.add('pt-pop');
+    setTimeout(() => counter.classList.remove('pt-pop'), 200);
 
-    // 2. 紙吹雪（Confetti）演出
     confetti({
-      particleCount: 40,
+      particleCount: 45,
       spread: 60,
-      origin: { y: 0.7 },
-      colors: ['#7e1081', '#c5a059', '#ffffff']
+      origin: { y: 0.65 },
+      colors: ['#c5a059', '#8b0018', '#ffffff']
     });
   }
 
   function deleteLog(id) {
-    studyLogs = studyLogs.filter(log => log.id !== id);
-    saveData();
-    renderLogList();
-    updateGoalProgress();
+    studyLogs = studyLogs.filter(l => l.id !== id);
+    renderLogs();
+    updateProgress();
+    renderBadges();
   }
 
-  function renderLogList() {
-    const selectedDate = document.getElementById('task-date').value;
+  function renderLogs() {
+    const date = document.getElementById('task-date').value;
     const listEl = document.getElementById('log-list');
     listEl.innerHTML = '';
 
-    const filteredLogs = studyLogs.filter(log => log.date === selectedDate);
-
-    if (filteredLogs.length === 0) {
-      listEl.innerHTML = '<li style="text-align:center; color:var(--text-sub); padding:10px;">この日の記録はまだありません</li>';
+    const filtered = studyLogs.filter(l => l.date === date);
+    if (filtered.length === 0) {
+      listEl.innerHTML = `<div style="text-align:center; color:var(--text-sub); font-size:0.75rem; padding:8px;">記録はありません</div>`;
       return;
     }
 
-    filteredLogs.slice().reverse().forEach(log => {
-      let badgeClass = 'bg-other';
-      if (log.subject === '英語') badgeClass = 'bg-english';
-      if (log.subject === '国語') badgeClass = 'bg-japanese';
-      if (log.subject === '日本史') badgeClass = 'bg-history';
-
-      const li = document.createElement('li');
-      li.className = 'task-item';
-      li.innerHTML = `
-        <div>
-          <span class="badge ${badgeClass}">${log.subject}</span>
-          <strong>${log.name}</strong> (${log.subSubject})
-        </div>
-        <div>
-          <span style="font-weight:bold; color:var(--waseda-crimson); font-family:'Times New Roman';">+1 pt</span>
-          <button class="delete-btn" onclick="deleteLog(${log.id})" style="margin-left:10px;">✕</button>
+    filtered.slice().reverse().forEach(l => {
+      listEl.innerHTML += `
+        <div class="log-item">
+          <div>
+            <b style="color:var(--waseda-gold);">[${l.subject}]</b> ${l.name}
+            <span style="font-size:0.7rem; color:var(--text-sub);">(${l.subSubject})</span>
+          </div>
+          <div>
+            <span style="font-weight:bold; color:var(--waseda-gold-light);">+1pt</span>
+            <button class="delete-btn" onclick="deleteLog(${l.id})">✕</button>
+          </div>
         </div>
       `;
-      listEl.appendChild(li);
     });
   }
 
-  function updateGoalProgress() {
-    const selectedDate = document.getElementById('task-date').value;
-    document.getElementById('hero-date-display').innerText = formatDateDisplay(selectedDate);
+  function updateProgress() {
+    const date = document.getElementById('task-date').value;
+    const targets = { '英語': 5, '国語': 3, '日本史': 4, 'その他': 2 };
+    const keys = { '英語': 'english', '国語': 'japanese', '日本史': 'history', 'その他': 'other' };
 
-    const subjects = [
-      { key: 'english', label: '英語' },
-      { key: 'japanese', label: '国語' },
-      { key: 'history', label: '日本史' },
-      { key: 'other', label: 'その他' }
-    ];
+    let dayPt = 0;
 
-    let totalTodayPt = 0;
+    Object.keys(targets).forEach(sub => {
+      const targetVal = targets[sub];
+      const count = studyLogs.filter(l => l.date === date && l.subject === sub).length;
+      dayPt += count;
 
-    subjects.forEach(sub => {
-      const goalMax = parseFloat(document.getElementById(`goal-${sub.key}`).value) || 0;
-      const todayVal = studyLogs
-        .filter(log => log.date === selectedDate && log.subject === sub.label)
-        .reduce((sum, log) => sum + log.amount, 0);
-
-      totalTodayPt += todayVal;
-
-      document.getElementById(`val-${sub.key}`).innerText = todayVal;
-      document.getElementById(`max-display-${sub.key}`).innerText = goalMax;
-
-      const percentage = goalMax > 0 ? Math.min(Math.round((todayVal / goalMax) * 100), 100) : 0;
-      const fillBar = document.getElementById(`bar-${sub.key}`);
-      fillBar.style.width = `${percentage}%`;
-
-      if (todayVal >= goalMax && goalMax > 0) {
-        fillBar.classList.add('completed');
-      } else {
-        fillBar.classList.remove('completed');
-      }
+      const key = keys[sub];
+      document.getElementById(`val-${key}`).innerText = count;
+      const pct = Math.min(100, Math.round((count / targetVal) * 100));
+      document.getElementById(`bar-${key}`).style.width = `${pct}%`;
     });
 
-    // メインptヒーロー更新
-    document.getElementById('hero-total-pt').innerHTML = `${totalTodayPt} <span style="font-size:1.5rem">pt</span>`;
+    document.getElementById('hero-pt').innerText = dayPt;
+
+    // 🧠 ランク更新（通算ポイントで進化）
+    const totalPt = studyLogs.length;
+    let rank = "早稲田の挑戦者";
+    if (totalPt >= 10) rank = "鍛錬の浪人";
+    if (totalPt >= 30) rank = "早稲田の鬼";
+    if (totalPt >= 80) rank = "キャンパスの覇者";
+    document.getElementById('user-rank').innerText = `RANK: ${rank}`;
   }
 
-  function renderSubSubjectSetting() {
-    const subject = document.getElementById('setting-subject-sub').value;
-    const container = document.getElementById('sub-subject-tags');
+  function renderBadges() {
+    const totalPt = studyLogs.length;
+    const container = document.getElementById('badge-container');
     container.innerHTML = '';
 
-    const list = savedSubSubjects[subject] || [];
-    list.forEach((item, index) => {
-      const tag = document.createElement('div');
-      tag.className = 'item-tag';
-      tag.innerHTML = `${item} <span class="del-tag" onclick="removeSubSubjectSetting('${subject}', ${index})">✕</span>`;
-      container.appendChild(tag);
+    badgesMaster.forEach(b => {
+      const isUnlocked = totalPt >= b.req;
+      container.innerHTML += `
+        <div class="badge-item ${isUnlocked ? 'unlocked' : ''}">
+          <span class="badge-icon">${b.icon}</span>
+          <div class="badge-name">${b.name}</div>
+          <div class="badge-req">${b.req}ptで解放</div>
+        </div>
+      `;
     });
   }
 
-  function addSubSubjectSetting() {
-    const subject = document.getElementById('setting-subject-sub').value;
-    const input = document.getElementById('new-sub-input');
-    const val = input.value.trim();
-
-    if (!val) return;
-    if (!savedSubSubjects[subject]) savedSubSubjects[subject] = [];
-    if (!savedSubSubjects[subject].includes(val)) {
-      savedSubSubjects[subject].push(val);
-      saveData();
-      renderSubSubjectSetting();
-      updateSubSubjectOptions();
-      input.value = '';
-    }
-  }
-
-  function removeSubSubjectSetting(subject, index) {
-    savedSubSubjects[subject].splice(index, 1);
-    saveData();
-    renderSubSubjectSetting();
-    updateSubSubjectOptions();
-  }
-
-  function renderTaskSetting() {
-    const subject = document.getElementById('setting-subject-task').value;
-    const container = document.getElementById('task-tags');
-    container.innerHTML = '';
-
-    const list = savedTasks[subject] || [];
-    list.forEach((item, index) => {
-      const tag = document.createElement('div');
-      tag.className = 'item-tag';
-      tag.innerHTML = `${item} <span class="del-tag" onclick="removeTaskSetting('${subject}', ${index})">✕</span>`;
-      container.appendChild(tag);
-    });
-  }
-
-  function addTaskSetting() {
-    const subject = document.getElementById('setting-subject-task').value;
-    const input = document.getElementById('new-task-input');
-    const val = input.value.trim();
-
-    if (!val) return;
-    if (!savedTasks[subject]) savedTasks[subject] = [];
-    if (!savedTasks[subject].includes(val)) {
-      savedTasks[subject].push(val);
-      saveData();
-      renderTaskSetting();
-      updateTaskSelectOptions();
-      input.value = '';
-    }
-  }
-
-  function removeTaskSetting(subject, index) {
-    savedTasks[subject].splice(index, 1);
-    saveData();
-    renderTaskSetting();
-    updateTaskSelectOptions();
-  }
-
-  function initCharts() {
-    const ctxBar = document.getElementById('barChart').getContext('2d');
-    barChart = new Chart(ctxBar, {
+  function initChart() {
+    const ctx = document.getElementById('barChart').getContext('2d');
+    barChart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: [],
-        datasets: [
-          { label: '英語', data: [], backgroundColor: '#e8bdc2' },
-          { label: '国語', data: [], backgroundColor: '#ebd8bd' },
-          { label: '日本史', data: [], backgroundColor: '#c2d8c0' },
-          { label: 'その他', data: [], backgroundColor: '#d0d3d4' }
-        ]
+        datasets: [{ label: '獲得pt', data: [], backgroundColor: '#c5a059' }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { stacked: true, grid: { display: false } },
-          y: { stacked: true, beginAtZero: true }
-        }
+          x: { ticks: { color: '#d1c4c6' }, grid: { display: false } },
+          y: { ticks: { color: '#d1c4c6' }, beginAtZero: true }
+        },
+        plugins: { legend: { display: false } }
       }
-    });
-
-    const ctxMain = document.getElementById('pieChartMain').getContext('2d');
-    pieChartMain = new Chart(ctxMain, {
-      type: 'doughnut',
-      data: {
-        labels: ['英語', '国語', '日本史', 'その他'],
-        datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#e8bdc2', '#ebd8bd', '#c2d8c0', '#d0d3d4'] }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-
-    const ctxEng = document.getElementById('pieChartEnglish').getContext('2d');
-    pieChartEnglish = new Chart(ctxEng, {
-      type: 'doughnut',
-      data: {
-        labels: ['単語', '文法', '解釈', '長文'],
-        datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#f8d7da', '#f1aeb5', '#ea868f', '#e35d6a'] }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-
-    const ctxJpn = document.getElementById('pieChartJapanese').getContext('2d');
-    pieChartJapanese = new Chart(ctxJpn, {
-      type: 'doughnut',
-      data: {
-        labels: ['現代文', '古文', '漢文'],
-        datasets: [{ data: [0, 0, 0], backgroundColor: ['#ffe5d9', '#fcd5ce', '#f8edeb'] }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
     });
   }
 
-  function updateCharts() {
+  function updateChart() {
     const dates = [...new Set(studyLogs.map(l => l.date))].sort();
-    
-    const engData = [], jpnData = [], hisData = [], othData = [];
+    const totals = dates.map(d => studyLogs.filter(l => l.date === d).length);
 
-    dates.forEach(d => {
-      const logs = studyLogs.filter(l => l.date === d);
-      engData.push(logs.filter(l => l.subject === '英語').reduce((s, l) => s + l.amount, 0));
-      jpnData.push(logs.filter(l => l.subject === '国語').reduce((s, l) => s + l.amount, 0));
-      hisData.push(logs.filter(l => l.subject === '日本史').reduce((s, l) => s + l.amount, 0));
-      othData.push(logs.filter(l => l.subject === 'その他').reduce((s, l) => s + l.amount, 0));
-    });
-
-    barChart.data.labels = dates.map(d => d.replace(/^\d{4}-/, ''));
-    barChart.data.datasets[0].data = engData;
-    barChart.data.datasets[1].data = jpnData;
-    barChart.data.datasets[2].data = hisData;
-    barChart.data.datasets[3].data = othData;
+    barChart.data.labels = dates.map(d => d.substring(5));
+    barChart.data.datasets[0].data = totals;
     barChart.update();
-
-    const mainTot = {
-      eng: studyLogs.filter(l => l.subject === '英語').reduce((s, l) => s + l.amount, 0),
-      jpn: studyLogs.filter(l => l.subject === '国語').reduce((s, l) => s + l.amount, 0),
-      his: studyLogs.filter(l => l.subject === '日本史').reduce((s, l) => s + l.amount, 0),
-      oth: studyLogs.filter(l => l.subject === 'その他').reduce((s, l) => s + l.amount, 0)
-    };
-    pieChartMain.data.datasets[0].data = [mainTot.eng, mainTot.jpn, mainTot.his, mainTot.oth];
-    pieChartMain.update();
-
-    const engLogs = studyLogs.filter(l => l.subject === '英語');
-    pieChartEnglish.data.datasets[0].data = [
-      engLogs.filter(l => l.subSubject === '単語').reduce((s, l) => s + l.amount, 0),
-      engLogs.filter(l => l.subSubject === '文法').reduce((s, l) => s + l.amount, 0),
-      engLogs.filter(l => l.subSubject === '解釈').reduce((s, l) => s + l.amount, 0),
-      engLogs.filter(l => l.subSubject === '長文').reduce((s, l) => s + l.amount, 0)
-    ];
-    pieChartEnglish.update();
-
-    const jpnLogs = studyLogs.filter(l => l.subject === '国語');
-    pieChartJapanese.data.datasets[0].data = [
-      jpnLogs.filter(l => l.subSubject === '現代文').reduce((s, l) => s + l.amount, 0),
-      jpnLogs.filter(l => l.subSubject === '古文').reduce((s, l) => s + l.amount, 0),
-      jpnLogs.filter(l => l.subSubject === '漢文').reduce((s, l) => s + l.amount, 0)
-    ];
-    pieChartJapanese.update();
   }
 
-  async function requestAiAnalysis() {
-    const apiKey = document.getElementById('api-key').value.trim();
-    const reportBox = document.getElementById('ai-report-output');
-    const reflection = document.getElementById('user-reflection').value;
-    const btn = document.getElementById('ai-btn');
+  function saveKey() {
+    localStorage.setItem('waseda_api_key', document.getElementById('api-key').value);
+  }
 
-    if (!apiKey) return alert("Gemini API Key を入力してください。");
-
-    btn.disabled = true;
-    btn.innerText = "Geminiが分析中...";
-    reportBox.innerText = "データを分析しています...";
-
-    const logSummary = studyLogs.map(l => `- ${l.date}: ${l.subject}(${l.subSubject}) ${l.name} +${l.amount}pt`).join('\n');
-
-    const prompt = `
-あなたは早稲田大学合格を目指す受験生を導く専属エリートAIパートナーです。
-以下の学習ログと相談内容を踏まえ、具体的で前向きなアドバイスを提示してください。
-
-【学習ログ】
-${logSummary || "（ログなし）"}
-
-【振り返り・相談】
-${reflection || "特になし。"}
-    `;
-
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      });
-
-      const data = await response.json();
-      if (data.candidates && data.candidates[0].content.parts[0].text) {
-        reportBox.innerText = data.candidates[0].content.parts[0].text;
-      } else {
-        reportBox.innerText = "エラー: レスポンスを取得できませんでした。";
-      }
-    } catch (err) {
-      console.error(err);
-      reportBox.innerText = "通信エラーが発生しました。";
-    } finally {
-      btn.disabled = false;
-      btn.innerText = "AIアドバイスを生成";
+  function clearAllData() {
+    if (confirm('すべての履歴を初期化しますか？')) {
+      studyLogs = [];
+      renderLogs();
+      updateProgress();
+      renderBadges();
+      alert('初期化が完了しました。');
     }
   }
 
-  window.onload = function() {
-    loadData();
-    updateSubSubjectOptions();
-    updateTaskSelectOptions();
-    initCharts();
-    renderLogList();
-    updateGoalProgress();
-  };
+  window.onload = init;
 </script>
 
 </body>
